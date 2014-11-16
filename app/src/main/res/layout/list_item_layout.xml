@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout for individual news entries in a list -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <!-- Name of bluetooth device-->
+    <TextView
+        android:id="@+id/ble_device_name_item"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="5dp"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Subtitle contains address of bluetooth device -->
+    <TextView
+        android:id="@+id/ble_device_address_item"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/ble_device_name_item"
+        android:layout_below="@id/ble_device_name_item"
+        android:textSize="14sp" />
+
+</RelativeLayout>
