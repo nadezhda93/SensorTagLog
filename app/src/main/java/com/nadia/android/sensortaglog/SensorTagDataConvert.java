@@ -27,7 +27,7 @@ public class SensorTagDataConvert {
 
 
     //2. convert Accelerometer sensor values
-    public double[] extractAccelerometerValues(final BluetoothGattCharacteristic c){
+    public static double[] extractAccelerometerValues(final BluetoothGattCharacteristic c){
         //Accelerometer has range [-2g, 2g] with unit (1/64)g
         //so divide by 64 to get g
         //The z value is multiplied by -1 to coincide with how pos y direction
@@ -48,7 +48,7 @@ public class SensorTagDataConvert {
 
 
     //3. convert Gyroscope sensor values
-    public float[] extractGyroValues(final BluetoothGattCharacteristic c){
+    public static float[] extractGyroValues(final BluetoothGattCharacteristic c){
         //x,y,z not in order
         float y = shortSignedAtOffset(c,0) * (500f / 65536f) * -1;
         float x = shortSignedAtOffset(c,2) * (500f / 65536f);
@@ -64,7 +64,7 @@ public class SensorTagDataConvert {
     }
 
     //4. convert Humidity sensor values
-    public float extractHumidityValues(final BluetoothGattCharacteristic c){
+    public static float extractHumidityValues(final BluetoothGattCharacteristic c){
         int a = shortUnSignedAtOffset(c,2);
         //bits [1..0] are status bits and need to be cleared according to the
         //user guide, but iOS code doesn't bother. Minimal impact

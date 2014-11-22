@@ -10,4 +10,5 @@
     <string name="devices_found_name">Devices discovered:</string>
     <string name="action_scan">Scan</string>
     <string name="select_device_to_connect">Scan and select a device to connect:</string>
+    <string name="select_sensor">Select sensor:</string>
 </resources>
