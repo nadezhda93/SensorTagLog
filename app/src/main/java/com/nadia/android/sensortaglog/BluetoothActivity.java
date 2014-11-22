@@ -82,8 +82,7 @@ public class BluetoothActivity extends Activity {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-    ////////////////onCreate() Lifecycle Activity Method ///////////////////////////////
+    //////////////////// Activity Lifecycle methods ////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +110,7 @@ public class BluetoothActivity extends Activity {
 
         //wire up ListView widget by resource ID
         mDevicesListView = (ListView) findViewById(R.id.devices_found_list);
-        //set the adapter to the listView in the layout using default android layout
+        //set the adapter to the listView in the layout using default android list layout
         mDevicesAdapter = new CustomListAdapter(this, android.R.layout.simple_list_item_1, mListOfDevices);
         mDevicesListView.setAdapter(mDevicesAdapter);
 
@@ -119,39 +118,56 @@ public class BluetoothActivity extends Activity {
         mDevicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //when clicked, log that it was clicked, connect to gatt server
+                //when clicked, log that it was clicked, stop scanning for devices
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 BluetoothDevice clicked_device = mDevicesAdapter.getItem(position);
                 Log.d(TAG, clicked_device.getName()+ " was clicked");
-                // open new activity
-                if (clicked_device == null) {
-                    return;
-                }
+
+                // open new activity using an intent and send in strings on device name and address
+                //they will then be used to connect to gattserver in the activity/service
                 final Intent intent = new Intent(BluetoothActivity.this, SensorDataActivity.class);
                 intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_NAME, clicked_device.getName());
                 intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_ADDRESS, clicked_device.getAddress());
+                //open new page/activity to display the available services (sensors) as a list again
+                //onStop() is called here
                 startActivity(intent);
             }
         });
 
     }
 
+    //called when a new semi-transparent activity partially obscures the current activity
     @Override
     protected void onPause(){
         super.onPause();
+        scanLeDevice(false);
+
+    }
+
+    //called when another app is switched to (hold Home button>select app)
+    //when your current activity starts a new activity (starting SensorDataActivity)
+    //when you receive a phonecall
+    @Override
+    protected void onStop(){
+        super.onStop();
         scanLeDevice(false);
         //empty list of found devices
         mDevicesAdapter.clear();
     }
 
+    //called when second activity is destroyed and this activity is back on screen
+    //should automatically be in the same state as before
+    @Override
+    protected void onStart(){
+        super.onStop();
+    }
+
+    //when back button is pressed and activity is destroyed
     @Override
     protected void onDestroy(){
         super.onDestroy();
         scanLeDevice(false);
-        //empty list of found devices
-        mDevicesAdapter.clear();
-        //close any GATT connection to server
-        mConnectedGatt.disconnect();
-        mConnectedGatt.close();
+
     }
 
     @Override

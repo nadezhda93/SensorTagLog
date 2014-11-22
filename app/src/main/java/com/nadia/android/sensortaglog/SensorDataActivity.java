@@ -22,8 +22,8 @@ import java.util.UUID;
 
 /**
  * Created by nadia on 17/11/14.
- * Activity that will host a fragment to display the results of the various sensors on a new page
- * after the user has clicked on a device and has connected to GATT server
+ * Activity that will display the results of the various sensors in a ListView
+ * and update them through the bound service SensorDataService
  */
 public class SensorDataActivity extends Activity {
     private static final String TAG = "SensorDataActivity";
@@ -34,18 +34,25 @@ public class SensorDataActivity extends Activity {
     private String mDeviceAddress;
     private SensorDataService mSensorDataService;
 
+    private boolean serviceConnectStatus = false;
+
+    //interface for binding a service to the activity
+    //need to override onServiceConnected() and onServiceDisconnected() methods
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        // interface for binding a service to the activity
-        // need to override onServiceConnected and onServiceDisconnected
+
         @Override
+        //cast object of the SensorDataService into one of LocalBinder
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mSensorDataService = ((SensorDataService.LocalBinder) service).getService();
             // get bluetooth manager again (in the service)
-            if (!mSensorDataService.initialise()) {
+            if (!(mSensorDataService.initialise())) {
+                serviceConnectStatus = false;
                 finish();
             }
-            // establish bluetooth connection to the device again
-            //mSensorDataService.connect(mDeviceAddress);
+            // establish bluetooth connection to the device again using the address
+            //received in the Intent
+            mSensorDataService.gattConnect(mDeviceAddress);
+            serviceConnectStatus = true;
         }
 
         @Override
@@ -54,25 +61,31 @@ public class SensorDataActivity extends Activity {
         }
     };
 
+
+    //////////////////// Activity Lifecycle methods ////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate started");
         setContentView(R.layout.activity_sensor_data);
-        // extract intent information
+
+        // extract intent information from BluetoothActivity
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
         Log.d(TAG, "Extracted device name: " + mDeviceName);
         Log.d(TAG, "Extracted device address: " + mDeviceAddress);
 
-        // bind service for Gatt server
+        //Bind to SensorDataService, thus starting it using intent
         Intent gattServiceIntent = new Intent(this, SensorDataService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //unbind from service when back button is pressed and activity is destroyed
+        unbindService(mServiceConnection);
     }
 }
