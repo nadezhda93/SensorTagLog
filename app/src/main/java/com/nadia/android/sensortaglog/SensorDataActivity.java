@@ -3,12 +3,16 @@ package com.nadia.android.sensortaglog;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -34,9 +38,8 @@ public class SensorDataActivity extends Activity {
     private String mDeviceAddress;
     private SensorDataService mSensorDataService;
 
-    private boolean serviceConnectStatus = false;
 
-    //interface for binding a service to the activity
+    //interface for binding a service to the client activity
     //need to override onServiceConnected() and onServiceDisconnected() methods
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -46,13 +49,11 @@ public class SensorDataActivity extends Activity {
             mSensorDataService = ((SensorDataService.LocalBinder) service).getService();
             // get bluetooth manager again (in the service)
             if (!(mSensorDataService.initialise())) {
-                serviceConnectStatus = false;
                 finish();
             }
             // establish bluetooth connection to the device again using the address
             //received in the Intent
             mSensorDataService.gattConnect(mDeviceAddress);
-            serviceConnectStatus = true;
         }
 
         @Override
@@ -69,6 +70,9 @@ public class SensorDataActivity extends Activity {
         Log.i(TAG, "onCreate started");
         setContentView(R.layout.activity_sensor_data);
 
+        //populate the HashMap of all services in the model class
+        SensorDataModel.populateMap();
+
         // extract intent information from BluetoothActivity
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -80,6 +84,10 @@ public class SensorDataActivity extends Activity {
         Intent gattServiceIntent = new Intent(this, SensorDataService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
+        //Register to receive broadcasts
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                                                                new IntentFilter("Humidity_read"));
+
     }
 
     @Override
@@ -87,5 +95,19 @@ public class SensorDataActivity extends Activity {
         super.onDestroy();
         //unbind from service when back button is pressed and activity is destroyed
         unbindService(mServiceConnection);
+        //unregister from broadcast
+        // Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
+
+
+    //Handler for received events
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //get extra data
+            String result = intent.getStringExtra("RESULT");
+            Log.d(TAG, "Received: " + result);
+        }
+    };
 }

@@ -29,7 +29,6 @@ public class BluetoothActivity extends Activity {
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothManager mBluetoothManager;
-    private BluetoothGatt    mConnectedGatt;
     private boolean mScanning;
     private Handler mHandler = new Handler();
     // Stops scanning after 5 seconds.
@@ -167,6 +166,7 @@ public class BluetoothActivity extends Activity {
     protected void onDestroy(){
         super.onDestroy();
         scanLeDevice(false);
+
 
     }
 

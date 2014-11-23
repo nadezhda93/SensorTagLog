@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -34,10 +35,6 @@ public class SensorDataService extends Service {
     private boolean writeStatus = false;
     private boolean servicesDiscoveredStatus = false;
 
-    private HashMap<String, ArrayList> allServices = new HashMap<String, ArrayList>();
-
-    private ArrayList<UUID> humidity  = new ArrayList<UUID>();
-
 
     // required to extend Binder in order to make
     // a private bound service (BLE example Android dev)
@@ -53,12 +50,6 @@ public class SensorDataService extends Service {
     //this function will be called inside ServiceConnection implementation in client activity
     public boolean initialise() {
         Log.d(TAG, "initialise() called");
-
-        humidity.add(UUID.fromString("f000aa20-0451-4000-b000-000000000000"));  //HUMIDITY_SERVICE
-        humidity.add(UUID.fromString("f000aa21-0451-4000-b000-000000000000"));  //HUMIDITY_DATA
-        humidity.add(UUID.fromString("f000aa22-0451-4000-b000-000000000000"));  //HUMIDITY_CONFIG
-
-        allServices.put("HUMIDITY", humidity);
 
         //initialise bluetooth adapter through BluetoothManager
         sBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -106,7 +97,7 @@ public class SensorDataService extends Service {
                 Log.d(TAG, "GATT services discovered");
                 servicesDiscoveredStatus = true;
                 //enable Humidity sensor
-                enableSensor(sConnectedGatt, (UUID)(allServices.get("HUMIDITY")).get(0), (UUID)(allServices.get("HUMIDITY")).get(2));
+                enableSensor(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"), (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_CONFIG"));
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
                 servicesDiscoveredStatus = false;
@@ -119,7 +110,7 @@ public class SensorDataService extends Service {
                 Log.d(TAG, "Write operation successful");
                 writeStatus = true;
                 //enable notifications for Humidity sensor
-                setNotification(sConnectedGatt, (UUID)(allServices.get("HUMIDITY")).get(0), (UUID)(allServices.get("HUMIDITY")).get(1));
+                setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"), (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_DATA"));
             }
             else{
                 Log.d(TAG, "Write operation returned status: " + status);
@@ -141,7 +132,10 @@ public class SensorDataService extends Service {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             //Log the value of the sensor and send to SensorDataActivity to display using an Intent
-            Log.d(TAG,"Humidity: "+ SensorTagDataConvert.extractHumidityValues(characteristic));
+            float humidity = SensorDataModel.extractHumidityValues(characteristic);
+            //Log.d(TAG,"Humidity: "+ humidity);
+            //Broadcast message to SensorDataActivity of the value
+            sendMessage(humidity);
         }
     };
 
@@ -167,6 +161,7 @@ public class SensorDataService extends Service {
 
     //Setting notification for a service on the device locally and remotely
     //from SensorTag manual
+    //must be called after enableSensor() write operation finishes
     private void setNotification(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID dataUuid){
         final UUID CCC = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
         Log.d(TAG, "setNotification() started");
@@ -184,6 +179,14 @@ public class SensorDataService extends Service {
     }
 
 
+    //method that broadcasts the result of the sensor read using an intent to activities
+    private void sendMessage(float result){
+        Log.d(TAG, "Broadcasting message...");
+        Intent intent = new Intent("Humidity_read");
+        //include result with the intent
+        intent.putExtra("RESULT",  String.valueOf(result));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
     /////////////////////// Service Lifecycle methods   /////////////////////////
 
     //called when an activity binds to the service
@@ -198,7 +201,6 @@ public class SensorDataService extends Service {
     public boolean onUnbind(Intent intent) {
         // make sure all connections to Gatt device are closed
         sConnectedGatt.disconnect();
-        sConnectedGatt.close();
 
         return super.onUnbind(intent);
     }
