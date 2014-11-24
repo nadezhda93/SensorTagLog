@@ -38,6 +38,9 @@ public class SensorDataActivity extends Activity {
     private String mDeviceAddress;
     private SensorDataService mSensorDataService;
 
+    private ListView mSensorsListView;
+    private ArrayList<String> mListOfSensors = new ArrayList<String>();
+    private ArrayList<String> mListOfResults = new ArrayList<String>();
 
     //interface for binding a service to the client activity
     //need to override onServiceConnected() and onServiceDisconnected() methods
@@ -84,10 +87,25 @@ public class SensorDataActivity extends Activity {
         Intent gattServiceIntent = new Intent(this, SensorDataService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
-        //Register to receive broadcasts
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                                                                new IntentFilter("Humidity_read"));
+        //wire up ListView widget by resource ID
+        mSensorsListView = (ListView) findViewById(R.id.sensors_found_list);
 
+        //set the adapter to the listView in the layout using default android list layout
+        //CustomSensorListAdapter mListOfSensorsAdapter = new CustomSensorListAdapter(this,android.R.layout.simple_list_item_1, mListOfSensors);
+        //mSensorsListView.setAdapter(mListOfSensorsAdapter);
+
+        //populate list of sensors
+        //mListOfSensors.add("Humidity");
+        //mListOfSensors.add("Accelerometer");
+
+        //mListOfSensorsAdapter.notifyDataSetChanged();
+
+        //Register to receive broadcasts for Humidity
+        LocalBroadcastManager.getInstance(this).registerReceiver(mHumidityMessageReceiver,
+                                                                new IntentFilter("Humidity"));
+        //Register to receive broadcasts for Accelerometer
+        LocalBroadcastManager.getInstance(this).registerReceiver(mAccMessageReceiver,
+                                                                new IntentFilter("Accelerometer"));
     }
 
     @Override
@@ -97,17 +115,28 @@ public class SensorDataActivity extends Activity {
         unbindService(mServiceConnection);
         //unregister from broadcast
         // Unregister since the activity is about to be closed.
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mHumidityMessageReceiver);
     }
 
 
     //Handler for received events
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mHumidityMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get extra data
             String result = intent.getStringExtra("RESULT");
-            Log.d(TAG, "Received: " + result);
+            Log.d(TAG, "Received Humidity: " + result);
+        }
+    };
+
+    private BroadcastReceiver mAccMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //get extra data
+            String result_x = intent.getStringExtra("RESULT x");
+            String result_y = intent.getStringExtra("RESULT y");
+            String result_z = intent.getStringExtra("RESULT z");
+            Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = " + result_y + " z = "+result_z);
         }
     };
 }

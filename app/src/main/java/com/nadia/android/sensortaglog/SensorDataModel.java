@@ -17,32 +17,32 @@ public class SensorDataModel {
 
     //1. IR temp UUIDs
     private static final UUID IR_SERVICE = UUID.fromString("f000aa00-0451-4000-b000-000000000000");
-    private static final UUID IR_SERVICE_DATA = UUID.fromString("f000aa01-0451-4000-b000-000000000000");
-    private static final UUID IR_SERVICE_CONFIG = UUID.fromString("f000aa02-0451-4000-b000-000000000000");
+    public static final UUID IR_DATA = UUID.fromString("f000aa01-0451-4000-b000-000000000000");
+    private static final UUID IR_CONFIG = UUID.fromString("f000aa02-0451-4000-b000-000000000000");
 
     //2. Accelerometer UUIDs
     private static final UUID ACCELEROMETER_SERVICE = UUID.fromString("f000aa10-0451-4000-b000-000000000000");
-    private static final UUID ACCELEROMETER_SERVICE_DATA = UUID.fromString("f000aa11-0451-4000-b000-000000000000");
-    private static final UUID ACCELEROMETER_SERVICE_CONFIG = UUID.fromString("f000aa12-0451-4000-b000-000000000000");
+    public static final UUID ACCELEROMETER_DATA = UUID.fromString("f000aa11-0451-4000-b000-000000000000");
+    private static final UUID ACCELEROMETER_CONFIG = UUID.fromString("f000aa12-0451-4000-b000-000000000000");
 
     //3. Gyroscope UUIDs
     private static final UUID GYRO_SERVICE = UUID.fromString("f000aa50-0451-4000-b000-000000000000");
-    private static final UUID GYRO_SERVICE_DATA = UUID.fromString("f000aa51-0451-4000-b000-000000000000");
-    private static final UUID GYRO_SERVICE_CONFIG = UUID.fromString("f000aa52-0451-4000-b000-000000000000");
+    public static final UUID GYRO_DATA = UUID.fromString("f000aa51-0451-4000-b000-000000000000");
+    private static final UUID GYRO_CONFIG = UUID.fromString("f000aa52-0451-4000-b000-000000000000");
 
     //4. Humidity Service UUID
     private static final UUID HUMIDITY_SERVICE = UUID.fromString("f000aa20-0451-4000-b000-000000000000");
-    private static final UUID HUMIDITY_SERVICE_DATA = UUID.fromString("f000aa21-0451-4000-b000-000000000000");
-    private static final UUID HUMIDITY_SERVICE_CONFIG = UUID.fromString("f000aa22-0451-4000-b000-000000000000");
+    public static final UUID HUMIDITY_DATA = UUID.fromString("f000aa21-0451-4000-b000-000000000000");
+    private static final UUID HUMIDITY_CONFIG = UUID.fromString("f000aa22-0451-4000-b000-000000000000");
 
     //5. Magnetometer UUIDs
     private static final UUID MAGNETOMETER_SERVICE = UUID.fromString("f000aa30-0451-4000-b000-000000000000");
-    private static final UUID MAGNETOMETER_DATA = UUID.fromString("f000aa31-0451-4000-b000-000000000000");
+    public static final UUID MAGNETOMETER_DATA = UUID.fromString("f000aa31-0451-4000-b000-000000000000");
     private static final UUID MAGNETOMETER_CONFIG = UUID.fromString("f000aa32-0451-4000-b000-000000000000");
 
     //6. Barometer UUIDs
     private static final UUID BAROMETER_SERVICE = UUID.fromString("f000aa40-0451-4000-b000-000000000000");
-    private static final UUID BAROMETER_DATA = UUID.fromString("f000aa41-0451-4000-b000-000000000000");
+    public static final UUID BAROMETER_DATA = UUID.fromString("f000aa41-0451-4000-b000-000000000000");
     private static final UUID BAROMETER_CONFIG = UUID.fromString("f000aa42-0451-4000-b000-000000000000");
 
     //Hashmap containing Name of service and another HASHMAP of the UUIDs
@@ -54,20 +54,20 @@ public class SensorDataModel {
 
     public static void populateMap(){
         humidity.put("HUMIDITY_SERVICE", HUMIDITY_SERVICE);
-        humidity.put("HUMIDITY_DATA",    HUMIDITY_SERVICE_DATA);
-        humidity.put("HUMIDITY_CONFIG",  HUMIDITY_SERVICE_CONFIG);
+        humidity.put("HUMIDITY_DATA",    HUMIDITY_DATA);
+        humidity.put("HUMIDITY_CONFIG",  HUMIDITY_CONFIG);
 
         allServices.put("Humidity", humidity);
 
         accelerometer.put("ACCELEROMETER_SERVICE", ACCELEROMETER_SERVICE);
-        accelerometer.put("ACCELEROMETER_DATA",    ACCELEROMETER_SERVICE_DATA);
-        accelerometer.put("ACCELEROMETER_CONFIG",  ACCELEROMETER_SERVICE_CONFIG);
+        accelerometer.put("ACCELEROMETER_DATA",    ACCELEROMETER_DATA);
+        accelerometer.put("ACCELEROMETER_CONFIG",  ACCELEROMETER_CONFIG);
 
         allServices.put("Accelerometer", accelerometer);
 
         irTemperature.put("IR_SERVICE", IR_SERVICE);
-        irTemperature.put("IR_DATA",    IR_SERVICE_DATA);
-        irTemperature.put("IR_CONFIG",  IR_SERVICE_CONFIG);
+        irTemperature.put("IR_DATA",    IR_DATA);
+        irTemperature.put("IR_CONFIG",  IR_CONFIG);
 
         allServices.put("IR temperature", irTemperature);
 
@@ -89,6 +89,10 @@ public class SensorDataModel {
 
         return (upperByte << 8) + lowerByte;
     }
+
+
+    //1. convert IR sensor values
+
 
 
     //2. convert Accelerometer sensor values

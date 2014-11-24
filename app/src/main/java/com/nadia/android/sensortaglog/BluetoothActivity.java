@@ -102,8 +102,6 @@ public class BluetoothActivity extends Activity {
         if (!mBluetoothAdapter.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
-            Toast.makeText(getApplicationContext(),"Bluetooth turned on"
-                    ,Toast.LENGTH_LONG).show();
         }
 
 
@@ -150,8 +148,6 @@ public class BluetoothActivity extends Activity {
     protected void onStop(){
         super.onStop();
         scanLeDevice(false);
-        //empty list of found devices
-        mDevicesAdapter.clear();
     }
 
     //called when second activity is destroyed and this activity is back on screen

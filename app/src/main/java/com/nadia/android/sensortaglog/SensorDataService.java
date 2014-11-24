@@ -13,7 +13,9 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -32,9 +34,9 @@ public class SensorDataService extends Service {
     private BluetoothAdapter sBluetoothAdapter;
     private BluetoothManager sBluetoothManager;
     private BluetoothGatt sConnectedGatt;
-    private boolean writeStatus = false;
-    private boolean servicesDiscoveredStatus = false;
 
+    private Handler enableHandler = new Handler();
+    private Handler notificationHandler = new Handler();
 
     // required to extend Binder in order to make
     // a private bound service (BLE example Android dev)
@@ -95,12 +97,25 @@ public class SensorDataService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "GATT services discovered");
-                servicesDiscoveredStatus = true;
+
                 //enable Humidity sensor
-                enableSensor(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"), (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_CONFIG"));
-            } else {
+                enableSensor(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"),
+                             (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_CONFIG"), true);
+                Log.d(TAG, "Humidity sensor enabled");
+                //enable Accelerometer sensor after 1 sec
+
+                enableHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_CONFIG"), true);
+                        Log.d(TAG, "Accelerometer sensor enabled");
+                    }
+                }, 1000);
+
+            }
+            else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
-                servicesDiscoveredStatus = false;
             }
         }
 
@@ -108,13 +123,22 @@ public class SensorDataService extends Service {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Log.d(TAG, "Write operation successful");
-                writeStatus = true;
                 //enable notifications for Humidity sensor
-                setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"), (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_DATA"));
+                setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"),
+                             (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_DATA"), true);
+
+                //enable notifications for Accelerometer sensor after 1 s
+                enableHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
+                    }
+                }, 1000);
+
             }
             else{
                 Log.d(TAG, "Write operation returned status: " + status);
-                writeStatus = false;
             }
         }
 
@@ -131,62 +155,97 @@ public class SensorDataService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            //Log the value of the sensor and send to SensorDataActivity to display using an Intent
-            float humidity = SensorDataModel.extractHumidityValues(characteristic);
-            //Log.d(TAG,"Humidity: "+ humidity);
-            //Broadcast message to SensorDataActivity of the value
-            sendMessage(humidity);
+
+            //check for which service the characteristic is received and send appropriate broadcast
+            if (characteristic.getUuid().equals(SensorDataModel.HUMIDITY_DATA)){
+                //Log the value of the sensor and send to SensorDataActivity to display using an Intent
+                float humidity = SensorDataModel.extractHumidityValues(characteristic);
+                Log.d(TAG,"Humidity: "+ humidity);
+                //Broadcast message to SensorDataActivity of the value
+                sendMessage(humidity);
+            }
+            else if(characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
+                double[] result = SensorDataModel.extractAccelerometerValues(characteristic);
+                Log.d(TAG, "Accelerometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                sendMessage(result[0],result[1],result[2]);
+            }
+
         }
     };
 
 
 
-    //Turn on humidity sensor (SensorTag manual)
+    //Turn on a sensor (SensorTag manual)
     //must be called after onServicesDiscovered finishes
     //DIFFERENT FOR GYROSCOPE
-
     //must wait for onCharacteristicWrite() callback method before issuing a new write operation
-    private void enableSensor(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID configUuid){
+    private void enableSensor(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID configUuid, boolean enable){
         //needs to run after asynchronous discoverServices() finishes running
-        //§and onServicesDiscovered callback is called
+        //and onServicesDiscovered callback is called
         Log.d(TAG, "enableSensor started");
-        if(servicesDiscoveredStatus) {
-            BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
-            BluetoothGattCharacteristic config = sensorService.getCharacteristic(configUuid);
+        BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
+        BluetoothGattCharacteristic config = sensorService.getCharacteristic(configUuid);
+
+        if(enable) {
             config.setValue(new byte[]{1});     //Different value for Gyroscope
             bluetoothGatt.writeCharacteristic(config);
             Log.d(TAG, "Sensor enabled");
+        }
+        else {
+            config.setValue(new byte[]{0});     //Different value for Gyroscope
+            bluetoothGatt.writeCharacteristic(config);
+            Log.d(TAG, "Sensor disabled");
         }
     }
 
     //Setting notification for a service on the device locally and remotely
     //from SensorTag manual
     //must be called after enableSensor() write operation finishes
-    private void setNotification(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID dataUuid){
+    private void setNotification(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID dataUuid, boolean enable){
         final UUID CCC = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
         Log.d(TAG, "setNotification() started");
-        //wait for previous write operation to occur first by checking status of callback
-        if(writeStatus) {
-            BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
-            BluetoothGattCharacteristic serviceDataCharacteristic = sensorService.getCharacteristic(dataUuid);
-            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, true); //Enabled locally
 
+        BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
+        BluetoothGattCharacteristic serviceDataCharacteristic = sensorService.getCharacteristic(dataUuid);
+
+        if(enable) {
+            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, true); //enabled locally
             BluetoothGattDescriptor configDescriptor = serviceDataCharacteristic.getDescriptor(CCC);
             configDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            bluetoothGatt.writeDescriptor(configDescriptor); //Enabled remotely
+            bluetoothGatt.writeDescriptor(configDescriptor); //enabled remotely
             Log.d(TAG, "Notifications set");
+        }
+        else {
+            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, false); //disabled locally
+            BluetoothGattDescriptor configDescriptor = serviceDataCharacteristic.getDescriptor(CCC);
+            configDescriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+            bluetoothGatt.writeDescriptor(configDescriptor); //disabled remotely
+            Log.d(TAG, "Notifications disabled");
         }
     }
 
 
-    //method that broadcasts the result of the sensor read using an intent to activities
+    //method that broadcasts the result of the humidity sensor read using an intent to activities
     private void sendMessage(float result){
-        Log.d(TAG, "Broadcasting message...");
-        Intent intent = new Intent("Humidity_read");
+        Log.d(TAG, "Broadcasting message humidity...");
+        Intent intent = new Intent("Humidity");
         //include result with the intent
         intent.putExtra("RESULT",  String.valueOf(result));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
+
+    //method that broadcasts the result of the accelerometer sensor read using an intent to activities
+    private void sendMessage(double x, double y, double z){
+        Log.d(TAG, "Broadcasting message accelerometer...");
+        Intent intent = new Intent("Accelerometer");
+        //include results with intent
+        intent.putExtra("RESULT x", String.valueOf(x));
+        intent.putExtra("RESULT y", String.valueOf(y));
+        intent.putExtra("RESULT z", String.valueOf(z));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+
     /////////////////////// Service Lifecycle methods   /////////////////////////
 
     //called when an activity binds to the service
