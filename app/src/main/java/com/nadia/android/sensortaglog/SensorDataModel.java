@@ -50,7 +50,8 @@ public class SensorDataModel {
     //Hashmap containing NAME of characteristic and UUID for each
     private static HashMap<String, UUID> humidity       = new HashMap<String, UUID>();
     private static HashMap<String, UUID> accelerometer  = new HashMap<String, UUID>();
-    private static HashMap<String, UUID> irTemperature  = new HashMap<String, UUID>();
+    private static HashMap<String, UUID> gyroscope      = new HashMap<String, UUID>();
+    private static HashMap<String, UUID> magnetometer   = new HashMap<String, UUID>();
 
     public static void populateMap(){
         humidity.put("HUMIDITY_SERVICE", HUMIDITY_SERVICE);
@@ -65,11 +66,17 @@ public class SensorDataModel {
 
         allServices.put("Accelerometer", accelerometer);
 
-        irTemperature.put("IR_SERVICE", IR_SERVICE);
-        irTemperature.put("IR_DATA",    IR_DATA);
-        irTemperature.put("IR_CONFIG",  IR_CONFIG);
+        gyroscope.put("GYRO_SERVICE", GYRO_SERVICE);
+        gyroscope.put("GYRO_DATA",    GYRO_DATA);
+        gyroscope.put("GYRO_CONFIG",  GYRO_CONFIG);
 
-        allServices.put("IR temperature", irTemperature);
+        allServices.put("Gyroscope", gyroscope);
+
+        magnetometer.put("MAGNETOMETER_SERVICE", MAGNETOMETER_SERVICE);
+        magnetometer.put("MAGNETOMETER_DATA",    MAGNETOMETER_DATA);
+        magnetometer.put("MAGNETOMETER_CONFIG",  MAGNETOMETER_CONFIG);
+
+        allServices.put("Magnetometer", magnetometer);
 
     }
 
@@ -91,11 +98,10 @@ public class SensorDataModel {
     }
 
 
-    //1. convert IR sensor values
 
 
 
-    //2. convert Accelerometer sensor values
+    //1. convert Accelerometer sensor values
     public static double[] extractAccelerometerValues(final BluetoothGattCharacteristic c){
         //Accelerometer has range [-2g, 2g] with unit (1/64)g
         //so divide by 64 to get g
@@ -116,7 +122,7 @@ public class SensorDataModel {
     }
 
 
-    //3. convert Gyroscope sensor values
+    //2. convert Gyroscope sensor values
     public static float[] extractGyroValues(final BluetoothGattCharacteristic c){
         //x,y,z not in order
         float y = shortSignedAtOffset(c,0) * (500f / 65536f) * -1;
@@ -131,6 +137,23 @@ public class SensorDataModel {
 
         return gyroData;
     }
+
+    //3.Convert Magnetometer values
+    public static float[] extractMagValues(final BluetoothGattCharacteristic c){
+        //Multiply x and y with -1 so values correspond to TI pictures
+        float x = shortSignedAtOffset(c,0) * (2000f / 65536f) * -1;
+        float y = shortSignedAtOffset(c,2) * (2000f / 65536f) * -1;
+        float z = shortSignedAtOffset(c,4) * (2000f / 65536f);
+
+        float[] magData = new float[3];
+
+        magData[0] = x;
+        magData[1] = y;
+        magData[2] = z;
+
+        return magData;
+    }
+
 
     //4. convert Humidity sensor values
     public static float extractHumidityValues(final BluetoothGattCharacteristic c){

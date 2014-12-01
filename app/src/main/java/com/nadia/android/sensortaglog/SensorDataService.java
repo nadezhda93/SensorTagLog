@@ -26,7 +26,7 @@ import java.util.UUID;
 /**
  * Created by nadia on 22/11/14.
  * A Bound Service which is used to connect to GattServer, set notifications for the SensorTag
- * sensors and send the readings to the SensorDataActivity.
+ * sensors and send the readings to the SensorDataActivity using BroadcastReceiver.
  */
 public class SensorDataService extends Service {
     private final static String TAG = "SensorDataService";
@@ -36,7 +36,6 @@ public class SensorDataService extends Service {
     private BluetoothGatt sConnectedGatt;
 
     private Handler enableHandler = new Handler();
-    private Handler notificationHandler = new Handler();
 
     // required to extend Binder in order to make
     // a private bound service (BLE example Android dev)
@@ -98,46 +97,64 @@ public class SensorDataService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "GATT services discovered");
 
-                //enable Humidity sensor
-                enableSensor(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"),
-                             (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_CONFIG"), true);
-                Log.d(TAG, "Humidity sensor enabled");
-                //enable Accelerometer sensor after 1 sec
+                //enable Accelerometer sensor
+                enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+                        (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_CONFIG"), true);
+                Log.d(TAG, "Accelerometer sensor enabled");
 
-                enableHandler.postDelayed(new Runnable(){
+                //enable Magnetometer sensor after 1 sec
+                enableHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
-                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_CONFIG"), true);
-                        Log.d(TAG, "Accelerometer sensor enabled");
+                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
+                        Log.d(TAG, "Magnetometer sensor enabled");
                     }
                 }, 1000);
 
-            }
-            else {
+                //enable Gyroscope sensor after 2 sec
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+                                (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_CONFIG"), true);
+
+                    }
+                }, 2000);
+
+            } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-            if(status == BluetoothGatt.GATT_SUCCESS){
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "Write operation successful");
-                //enable notifications for Humidity sensor
-                setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_SERVICE"),
-                             (UUID)SensorDataModel.allServices.get("Humidity").get("HUMIDITY_DATA"), true);
+                //enable notifications for Accelerometer sensor
+                setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+                                                (UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
 
-                //enable notifications for Accelerometer sensor after 1 s
-                enableHandler.postDelayed(new Runnable(){
+                //enable notifications for Magnetometer sensor after 1 s
+                enableHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        setNotification(sConnectedGatt,(UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
-                                (UUID)SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
+                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
                     }
                 }, 1000);
 
-            }
-            else{
+                //enable notifications for Gyroscope sensor after 1 s
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
+                        Log.d(TAG, "Gyro notifications enabled");
+                    }
+                }, 2500);
+
+            } else {
                 Log.d(TAG, "Write operation returned status: " + status);
             }
         }
@@ -148,7 +165,7 @@ public class SensorDataService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-            //DO SOMETHING WHEN SENSOR IS READ
+                //DO SOMETHING WHEN SENSOR IS READ
             }
         }
 
@@ -157,23 +174,27 @@ public class SensorDataService extends Service {
                                             BluetoothGattCharacteristic characteristic) {
 
             //check for which service the characteristic is received and send appropriate broadcast
-            if (characteristic.getUuid().equals(SensorDataModel.HUMIDITY_DATA)){
+            if (characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
                 //Log the value of the sensor and send to SensorDataActivity to display using an Intent
-                float humidity = SensorDataModel.extractHumidityValues(characteristic);
-                Log.d(TAG,"Humidity: "+ humidity);
-                //Broadcast message to SensorDataActivity of the value
-                sendMessage(humidity);
-            }
-            else if(characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
                 double[] result = SensorDataModel.extractAccelerometerValues(characteristic);
                 Log.d(TAG, "Accelerometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
-                sendMessage(result[0],result[1],result[2]);
+                sendAccMessage(result[0], result[1], result[2]);
+
             }
+            else if (characteristic.getUuid().equals(SensorDataModel.MAGNETOMETER_DATA)) {
+                float[] result = SensorDataModel.extractMagValues(characteristic);
+                Log.d(TAG, "Magnetometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                sendMagMessage(result[0], result[1], result[2]);
 
+            }
+            else if (characteristic.getUuid().equals(SensorDataModel.GYRO_DATA)) {
+                float[] result = SensorDataModel.extractGyroValues(characteristic);
+                Log.d(TAG, "Gyroscope: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                sendGyroMessage(result[0], result[1], result[2]);
+            }
         }
+
     };
-
-
 
     //Turn on a sensor (SensorTag manual)
     //must be called after onServicesDiscovered finishes
@@ -187,16 +208,24 @@ public class SensorDataService extends Service {
         BluetoothGattCharacteristic config = sensorService.getCharacteristic(configUuid);
 
         if(enable) {
-            config.setValue(new byte[]{1});     //Different value for Gyroscope
-            bluetoothGatt.writeCharacteristic(config);
-            Log.d(TAG, "Sensor enabled");
+
+            if(serviceUuid.equals(SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"))){
+                config.setValue(new byte[]{7}); //enable all three sensors for Gyro
+                Log.d(TAG, "Gyro sensor enabled");
+            }
+            else {
+                config.setValue(new byte[]{1});
+                Log.d(TAG, "Sensor enabled");
+            }
         }
         else {
-            config.setValue(new byte[]{0});     //Different value for Gyroscope
-            bluetoothGatt.writeCharacteristic(config);
+            config.setValue(new byte[]{0});     //Disable sensor
             Log.d(TAG, "Sensor disabled");
         }
+        bluetoothGatt.writeCharacteristic(config);
     }
+
+
 
     //Setting notification for a service on the device locally and remotely
     //from SensorTag manual
@@ -225,26 +254,38 @@ public class SensorDataService extends Service {
     }
 
 
-    //method that broadcasts the result of the humidity sensor read using an intent to activities
-    private void sendMessage(float result){
-        Log.d(TAG, "Broadcasting message humidity...");
-        Intent intent = new Intent("Humidity");
+    //method that broadcasts the result of the magnetometer sensor read using an intent to activities
+    private void sendMagMessage(float x, float y, float z){
+        Log.d(TAG, "Broadcasting message magnetometer...");
+        Intent intent = new Intent("Magnetometer");
         //include result with the intent
-        intent.putExtra("RESULT",  String.valueOf(result));
+        intent.putExtra("RESULT x", String.format("%.2f", x));
+        intent.putExtra("RESULT y", String.format("%.2f", y));
+        intent.putExtra("RESULT z", String.format("%.2f", z));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     //method that broadcasts the result of the accelerometer sensor read using an intent to activities
-    private void sendMessage(double x, double y, double z){
+    private void sendAccMessage(double x, double y, double z){
         Log.d(TAG, "Broadcasting message accelerometer...");
         Intent intent = new Intent("Accelerometer");
-        //include results with intent
-        intent.putExtra("RESULT x", String.valueOf(x));
-        intent.putExtra("RESULT y", String.valueOf(y));
-        intent.putExtra("RESULT z", String.valueOf(z));
+        //include results with intent, convert double to two decimal places string
+        intent.putExtra("RESULT x", String.format("%.2f", x));
+        intent.putExtra("RESULT y", String.format("%.2f", y));
+        intent.putExtra("RESULT z", String.format("%.2f", z));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
+        //method that broadcasts the result of the magnetometer sensor read using an intent to activities
+    private void sendGyroMessage(float x, float y, float z){
+         Log.d(TAG, "Broadcasting message gyroscope...");
+         Intent intent = new Intent("Gyroscope");
+         //include result with the intent
+         intent.putExtra("RESULT x", String.format("%.2f", x));
+         intent.putExtra("RESULT y", String.format("%.2f", y));
+         intent.putExtra("RESULT z", String.format("%.2f", z));
+         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
 
     /////////////////////// Service Lifecycle methods   /////////////////////////
 
