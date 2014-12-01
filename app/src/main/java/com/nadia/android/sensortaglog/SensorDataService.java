@@ -270,9 +270,9 @@ public class SensorDataService extends Service {
         Log.d(TAG, "Broadcasting message accelerometer...");
         Intent intent = new Intent("Accelerometer");
         //include results with intent, convert double to two decimal places string
-        intent.putExtra("RESULT x", String.format("%.2f", x));
-        intent.putExtra("RESULT y", String.format("%.2f", y));
-        intent.putExtra("RESULT z", String.format("%.2f", z));
+        intent.putExtra("RESULT x", x);
+        intent.putExtra("RESULT y", y);  //String.format("%.2f", y)
+        intent.putExtra("RESULT z", z);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

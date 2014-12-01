@@ -43,6 +43,7 @@ public class SensorDataActivity extends Activity {
     private TextView mGyroscopeValue;
     private TextView mMagnetometerValue;
 
+    private SensorDataSQLiteHelper db = new SensorDataSQLiteHelper(this);
 
     //interface for binding a service to the client activity
     //need to override onServiceConnected() and onServiceDisconnected() methods
@@ -103,6 +104,7 @@ public class SensorDataActivity extends Activity {
         //Register to receive broadcasts for Gyro
         LocalBroadcastManager.getInstance(this).registerReceiver(mGyroMessageReceiver,
                                                                 new IntentFilter("Gyroscope"));
+
     }
 
     @Override
@@ -134,15 +136,23 @@ public class SensorDataActivity extends Activity {
     private BroadcastReceiver mAccMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //get extra data
-            String result_x = intent.getStringExtra("RESULT x");
-            String result_y = intent.getStringExtra("RESULT y");
-            String result_z = intent.getStringExtra("RESULT z");
+            //get extra data as doubles
+            double resultX = intent.getDoubleExtra("RESULT x", 0.00);
+            double resultY = intent.getDoubleExtra("RESULT y", 0.00);
+            double resultZ = intent.getDoubleExtra("RESULT z", 0.00);
+            //convert to strings
+            String result_x = String.format("%.2f", resultX);
+            String result_y = String.format("%.2f", resultY);
+            String result_z = String.format("%.2f", resultZ);
             Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = " + result_y + " z = "+result_z);
 
             mAccelerometerValue.setText("x = " + result_x + " y = " +
                                                  result_y + " z = " +
-                                                 result_z + " g");
+                                                 result_z + " g");      //display as strings
+
+
+            //add values to table
+            db.addAcceleration(resultX,resultY, resultZ);
         }
     };
 
