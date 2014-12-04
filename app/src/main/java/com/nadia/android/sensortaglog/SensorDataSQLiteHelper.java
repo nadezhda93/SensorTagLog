@@ -8,11 +8,13 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+
 
 /**
- * Created by nadia on 01/12/14.
+ * Created by nadia on 01/12/14. Database to store the broadcasted results of the
+ * Accelerometer in a table format with a timestamp. Currently saves db file in system storage.
  */
 public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
@@ -23,20 +25,32 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     private static final String FILE_DIR = "SensorTagLog";
 
 
-    //Acceleration table name
-    private static final String TABLE_ACCELERATION = "Acceleration";
+    //table names
+    private static final String TABLE_ACCELEROMETER  = "Accelerometer";
+    private static final String TABLE_GYROSCOPE     = "Gyroscope";
+    private static final String TABLE_MAGNETOMETER  = "Magnetometer";
 
-    //Acceleration table columns
-
-
+    //table column names
     private static final String TIME = "time";
-    private static final String X = "x";
-    private static final String Y = "y";
-    private static final String Z = "z";
+    private static final String X    = "x";
+    private static final String Y    = "y";
+    private static final String Z    = "z";
 
     private static final String[] COLUMNS = {TIME,X,Y,Z};
 
-    private static final String CREATE_ACCELERATION_TABLE = "CREATE TABLE Acceleration ( " +
+    private static final String CREATE_ACCELEROMETER_TABLE = "CREATE TABLE Accelerometer ( " +
+                                                              "time TEXT, " +
+                                                              "x REAL, "+
+                                                              "y REAL, "+
+                                                              "z REAL)";
+
+    private static final String CREATE_GYROSCOPE_TABLE = "CREATE TABLE Gyroscope ( " +
+                                                              "time TEXT, " +
+                                                              "x REAL, "+
+                                                              "y REAL, "+
+                                                              "z REAL)";
+
+    private static final String CREATE_MAGNETOMETER_TABLE = "CREATE TABLE Magnetometer ( " +
                                                               "time TEXT, " +
                                                               "x REAL, "+
                                                               "y REAL, "+
@@ -53,13 +67,17 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     @Override
     //creation and initial population of tables occurs
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(CREATE_ACCELERATION_TABLE);
+        database.execSQL(CREATE_ACCELEROMETER_TABLE);
+        database.execSQL(CREATE_GYROSCOPE_TABLE);
+        database.execSQL(CREATE_MAGNETOMETER_TABLE);
     }
 
     //upgrading the database to a newer version
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion){
         // Drop older Acceleration table if existed
         database.execSQL("DROP TABLE IF EXISTS Acceleration");
+        database.execSQL("DROP TABLE IF EXISTS Gyroscope");
+        database.execSQL("DROP TABLE IF EXISTS Magnetometer");
 
         // create fresh books table
         this.onCreate(database);
@@ -68,8 +86,8 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
 
     //add new accelerometer entry to table
-    public void addAcceleration(double x, double y, double z){
-        Log.d(TAG, "addAcceleration called");
+    public void addToDatabaseTable(float x, float y, float z, String table){
+        Log.d(TAG, "addToDatabaseTable called");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS");
         String timestamp = dateFormat.format(new Date());
@@ -84,12 +102,27 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         values.put(Y, y);
         values.put(Z, z);
 
-        // 3. insert
-        db.insert(TABLE_ACCELERATION, // table
-                null, //nullColumnHack
-                values); // key/value -> keys = column names/ values = column values
+        // 3. insert into required table
+        if(table.equals(SensorDataActivity.ACCELEROMETER_INTENT_FILTER)) {
+            db.insert(TABLE_ACCELEROMETER, // table
+                    null, //nullColumnHack
+                    values); // key/value -> keys = column names/ values = column values
+        }
+        else if (table.equals(SensorDataActivity.GYROSCOPE_INTENT_FILTER)){
+            db.insert(TABLE_GYROSCOPE, // table
+                    null, //nullColumnHack
+                    values); // key/value -> keys = column names/ values = column values
 
-        // 4. close
+        }
+        else if(table.equals(SensorDataActivity.MAGNETOMETER_INTENT_FILTER)){
+            db.insert(TABLE_MAGNETOMETER, // table
+                    null, //nullColumnHack
+                    values); // key/value -> keys = column names/ values = column values
+        }
+        else{
+            Log.d(TAG, "Error finding table required");
+        }
+        // 4. close the database
         db.close();
     }
 }

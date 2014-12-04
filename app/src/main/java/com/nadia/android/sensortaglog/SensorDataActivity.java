@@ -35,6 +35,10 @@ public class SensorDataActivity extends Activity {
     public static final String EXTRAS_DEVICE_NAME = "ExtrasDeviceName";
     public static final String EXTRAS_DEVICE_ADDRESS = "ExtrasDeviceAddress";
 
+    public static final String ACCELEROMETER_INTENT_FILTER = "com.nadia.android.sensortaglog.Accelerometer";
+    public static final String GYROSCOPE_INTENT_FILTER = "com.nadia.android.sensortaglog.Gyroscope";
+    public static final String MAGNETOMETER_INTENT_FILTER = "com.nadia.android.sensortaglog.Magnetometer";
+
     private String mDeviceName;
     private String mDeviceAddress;
     private SensorDataService mSensorDataService;
@@ -97,13 +101,13 @@ public class SensorDataActivity extends Activity {
 
         //Register to receive broadcasts for Magnetometer
         LocalBroadcastManager.getInstance(this).registerReceiver(mMagnetometerMessageReceiver,
-                                                                new IntentFilter("Magnetometer"));
+                                                                new IntentFilter(MAGNETOMETER_INTENT_FILTER));
         //Register to receive broadcasts for Accelerometer
         LocalBroadcastManager.getInstance(this).registerReceiver(mAccMessageReceiver,
-                                                                new IntentFilter("Accelerometer"));
+                                                                new IntentFilter(ACCELEROMETER_INTENT_FILTER));
         //Register to receive broadcasts for Gyro
         LocalBroadcastManager.getInstance(this).registerReceiver(mGyroMessageReceiver,
-                                                                new IntentFilter("Gyroscope"));
+                                                                new IntentFilter(GYROSCOPE_INTENT_FILTER));
 
     }
 
@@ -123,24 +127,33 @@ public class SensorDataActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get extra data
-            String result_x = intent.getStringExtra("RESULT x");
-            String result_y = intent.getStringExtra("RESULT y");
-            String result_z = intent.getStringExtra("RESULT z");
+            float resultX = intent.getFloatExtra("RESULT x", 0);
+            float resultY = intent.getFloatExtra("RESULT y", 0);
+            float resultZ = intent.getFloatExtra("RESULT z", 0);
+
+            //convert to strings, two dec places
+            String result_x = String.format("%.2f", resultX);
+            String result_y = String.format("%.2f", resultY);
+            String result_z = String.format("%.2f", resultZ);
             Log.d(TAG, "Received Magnetometer: x = " + result_x + " y = " + result_y + " z = "+result_z);
             mMagnetometerValue.setText("x = " + result_x + " y = " +
                                                 result_y + " z = " +
                                                 result_z + " uT");
+
+            //add values to table
+            db.addToDatabaseTable(resultX,resultY, resultZ, MAGNETOMETER_INTENT_FILTER);
         }
     };
 
     private BroadcastReceiver mAccMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //get extra data as doubles
+            //get extra data as doubles - cast to floats
             double resultX = intent.getDoubleExtra("RESULT x", 0.00);
             double resultY = intent.getDoubleExtra("RESULT y", 0.00);
             double resultZ = intent.getDoubleExtra("RESULT z", 0.00);
-            //convert to strings
+
+            //convert to strings two decimal places
             String result_x = String.format("%.2f", resultX);
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
@@ -152,7 +165,7 @@ public class SensorDataActivity extends Activity {
 
 
             //add values to table
-            db.addAcceleration(resultX,resultY, resultZ);
+            db.addToDatabaseTable((float)resultX,(float)resultY,(float)resultZ, ACCELEROMETER_INTENT_FILTER);
         }
     };
 
@@ -160,14 +173,23 @@ public class SensorDataActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get extra data
-            String result_x = intent.getStringExtra("RESULT x");
-            String result_y = intent.getStringExtra("RESULT y");
-            String result_z = intent.getStringExtra("RESULT z");
+            float resultX = intent.getFloatExtra("RESULT x", 0);
+            float resultY = intent.getFloatExtra("RESULT y", 0);
+            float resultZ = intent.getFloatExtra("RESULT z", 0);
+
+            //convert to strings, two dec places
+            String result_x = String.format("%.2f", resultX);
+            String result_y = String.format("%.2f", resultY);
+            String result_z = String.format("%.2f", resultZ);
+
             Log.d(TAG, "Received Gyroscope: x = " + result_x + " y = " + result_y + " z = "+result_z);
 
             mGyroscopeValue.setText("x = " + result_x + " y = " +
                     result_y + " z = " +
                     result_z + " deg");
+
+            //add values to table
+            db.addToDatabaseTable(resultX,resultY, resultZ, GYROSCOPE_INTENT_FILTER);
         }
     };
 }

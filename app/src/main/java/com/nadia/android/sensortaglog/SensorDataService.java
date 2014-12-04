@@ -257,18 +257,18 @@ public class SensorDataService extends Service {
     //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendMagMessage(float x, float y, float z){
         Log.d(TAG, "Broadcasting message magnetometer...");
-        Intent intent = new Intent("Magnetometer");
+        Intent intent = new Intent(SensorDataActivity.MAGNETOMETER_INTENT_FILTER);
         //include result with the intent
-        intent.putExtra("RESULT x", String.format("%.2f", x));
-        intent.putExtra("RESULT y", String.format("%.2f", y));
-        intent.putExtra("RESULT z", String.format("%.2f", z));
+        intent.putExtra("RESULT x", x);
+        intent.putExtra("RESULT y", y);  //String.format("%.2f", y)
+        intent.putExtra("RESULT z", z);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     //method that broadcasts the result of the accelerometer sensor read using an intent to activities
     private void sendAccMessage(double x, double y, double z){
         Log.d(TAG, "Broadcasting message accelerometer...");
-        Intent intent = new Intent("Accelerometer");
+        Intent intent = new Intent(SensorDataActivity.ACCELEROMETER_INTENT_FILTER);
         //include results with intent, convert double to two decimal places string
         intent.putExtra("RESULT x", x);
         intent.putExtra("RESULT y", y);  //String.format("%.2f", y)
@@ -279,11 +279,11 @@ public class SensorDataService extends Service {
         //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendGyroMessage(float x, float y, float z){
          Log.d(TAG, "Broadcasting message gyroscope...");
-         Intent intent = new Intent("Gyroscope");
+         Intent intent = new Intent(SensorDataActivity.GYROSCOPE_INTENT_FILTER);
          //include result with the intent
-         intent.putExtra("RESULT x", String.format("%.2f", x));
-         intent.putExtra("RESULT y", String.format("%.2f", y));
-         intent.putExtra("RESULT z", String.format("%.2f", z));
+         intent.putExtra("RESULT x", x);
+         intent.putExtra("RESULT y", y);  //String.format("%.2f", y)
+         intent.putExtra("RESULT z", z);
          LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
