@@ -15,35 +15,23 @@ import java.util.UUID;
 public class SensorDataModel {
 
 
-    //1. IR temp UUIDs
-    private static final UUID IR_SERVICE = UUID.fromString("f000aa00-0451-4000-b000-000000000000");
-    public static final UUID IR_DATA = UUID.fromString("f000aa01-0451-4000-b000-000000000000");
-    private static final UUID IR_CONFIG = UUID.fromString("f000aa02-0451-4000-b000-000000000000");
-
     //2. Accelerometer UUIDs
     private static final UUID ACCELEROMETER_SERVICE = UUID.fromString("f000aa10-0451-4000-b000-000000000000");
-    public static final UUID ACCELEROMETER_DATA = UUID.fromString("f000aa11-0451-4000-b000-000000000000");
-    private static final UUID ACCELEROMETER_CONFIG = UUID.fromString("f000aa12-0451-4000-b000-000000000000");
+    public static final UUID ACCELEROMETER_DATA     = UUID.fromString("f000aa11-0451-4000-b000-000000000000");
+    private static final UUID ACCELEROMETER_CONFIG  = UUID.fromString("f000aa12-0451-4000-b000-000000000000");
+    public static final UUID ACCELEROMETER_PERIOD   = UUID.fromString("f000aa13-0451-4000-b000-000000000000");
 
     //3. Gyroscope UUIDs
     private static final UUID GYRO_SERVICE = UUID.fromString("f000aa50-0451-4000-b000-000000000000");
     public static final UUID GYRO_DATA = UUID.fromString("f000aa51-0451-4000-b000-000000000000");
     private static final UUID GYRO_CONFIG = UUID.fromString("f000aa52-0451-4000-b000-000000000000");
-
-    //4. Humidity Service UUID
-    private static final UUID HUMIDITY_SERVICE = UUID.fromString("f000aa20-0451-4000-b000-000000000000");
-    public static final UUID HUMIDITY_DATA = UUID.fromString("f000aa21-0451-4000-b000-000000000000");
-    private static final UUID HUMIDITY_CONFIG = UUID.fromString("f000aa22-0451-4000-b000-000000000000");
+    public static final UUID GYRO_PERIOD = UUID.fromString("f000aa53-0451-4000-b000-000000000000");
 
     //5. Magnetometer UUIDs
     private static final UUID MAGNETOMETER_SERVICE = UUID.fromString("f000aa30-0451-4000-b000-000000000000");
     public static final UUID MAGNETOMETER_DATA = UUID.fromString("f000aa31-0451-4000-b000-000000000000");
     private static final UUID MAGNETOMETER_CONFIG = UUID.fromString("f000aa32-0451-4000-b000-000000000000");
-
-    //6. Barometer UUIDs
-    private static final UUID BAROMETER_SERVICE = UUID.fromString("f000aa40-0451-4000-b000-000000000000");
-    public static final UUID BAROMETER_DATA = UUID.fromString("f000aa41-0451-4000-b000-000000000000");
-    private static final UUID BAROMETER_CONFIG = UUID.fromString("f000aa42-0451-4000-b000-000000000000");
+    public static final UUID MAGNETOMETER_PERIOD = UUID.fromString("f000aa33-0451-4000-b000-000000000000");
 
     //Hashmap containing Name of service and another HASHMAP of the UUIDs
     public static HashMap<String, HashMap> allServices  = new HashMap<String, HashMap>();
@@ -54,11 +42,6 @@ public class SensorDataModel {
     private static HashMap<String, UUID> magnetometer   = new HashMap<String, UUID>();
 
     public static void populateMap(){
-        humidity.put("HUMIDITY_SERVICE", HUMIDITY_SERVICE);
-        humidity.put("HUMIDITY_DATA",    HUMIDITY_DATA);
-        humidity.put("HUMIDITY_CONFIG",  HUMIDITY_CONFIG);
-
-        allServices.put("Humidity", humidity);
 
         accelerometer.put("ACCELEROMETER_SERVICE", ACCELEROMETER_SERVICE);
         accelerometer.put("ACCELEROMETER_DATA",    ACCELEROMETER_DATA);

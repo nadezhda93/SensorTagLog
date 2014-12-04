@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +94,8 @@ public class SensorDataActivity extends Activity {
         //Bind to SensorDataService, thus starting it using intent
         Intent gattServiceIntent = new Intent(this, SensorDataService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        Toast.makeText(this,"Initialising sensors...", Toast.LENGTH_LONG).show();
 
         //wire TextView widgets
         mAccelerometerValue = (TextView)findViewById(R.id.accelerometer_value);
