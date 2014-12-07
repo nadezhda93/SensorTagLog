@@ -95,9 +95,9 @@ public class SensorDataModel {
         int y = c.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
         int z = c.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2)* -1;
 
-        accData[0] = x/64.0;
-        accData[1] = y/64.0;
-        accData[2] = z/64.0;
+        accData[0] = x/16.0;
+        accData[1] = y/16.0;
+        accData[2] = z/16.0;
 
 
         //return an array of three values corresponding to x,y,z co-ords

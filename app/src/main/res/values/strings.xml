@@ -14,4 +14,6 @@
     <string name="accelerometer">Accelerometer</string>
     <string name="gyroscope">Gyroscope</string>
     <string name="magnetometer">Magnetometer</string>
+    <string name="plot_button">Plots</string>
+    <string name="record_button">Record</string>
 </resources>
