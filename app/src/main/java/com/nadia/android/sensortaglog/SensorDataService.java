@@ -208,7 +208,6 @@ public class SensorDataService extends Service {
             //check for which service the characteristic is received and send appropriate broadcast
             if (characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
                 //Log the value of the sensor and send to SensorDataActivity to display using an Intent
-                Log.d(TAG, "WTF: instance characteristic id: " + characteristic.getInstanceId());
                 double[] result = SensorDataModel.extractAccelerometerValues(characteristic);
                 Log.d(TAG, "Accelerometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
                 sendAccMessage(result[0], result[1], result[2]);

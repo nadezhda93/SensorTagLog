@@ -86,11 +86,9 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
 
     //add new accelerometer entry to table
-    public void addToDatabaseTable(float x, float y, float z, String table){
+    public void addToDatabaseTable(float x, float y, float z, String timestamp, String table){
         Log.d(TAG, "addToDatabaseTable called");
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS");
-        String timestamp = dateFormat.format(new Date());
 
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
