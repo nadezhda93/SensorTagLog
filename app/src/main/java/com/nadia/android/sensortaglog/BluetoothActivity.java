@@ -118,16 +118,26 @@ public class BluetoothActivity extends Activity {
                 //when clicked, log that it was clicked, stop scanning for devices
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 BluetoothDevice clicked_device = mDevicesAdapter.getItem(position);
-                Log.d(TAG, clicked_device.getName()+ " was clicked");
-
                 // open new activity using an intent and send in strings on device name and address
                 //they will then be used to connect to gattserver in the activity/service
-                final Intent intent = new Intent(BluetoothActivity.this, SensorDataActivity.class);
-                intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_NAME, clicked_device.getName());
-                intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_ADDRESS, clicked_device.getAddress());
-                //open new page/activity to display the available services (sensors) as a list again
-                //onStop() is called here
-                startActivity(intent);
+                //open only if device is SensorTag
+
+                if(clicked_device.getName() != null) {
+                    if (clicked_device.getName().equals("SensorTag")) {
+                        Log.d(TAG, clicked_device.getName() + " was clicked");
+                        final Intent intent = new Intent(BluetoothActivity.this, SensorDataActivity.class);
+                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_NAME, clicked_device.getName());
+                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_ADDRESS, clicked_device.getAddress());
+                        //open new page/activity to display the available services (sensors) as a list again
+                        //onStop() is called here
+                        startActivity(intent);
+                    }
+                }
+                else {
+                    //Display a message requiring the device to be a SensorTag
+                    Toast.makeText(BluetoothActivity.this, "Device must be a SensorTag.",Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, clicked_device.getName() + " clicked");
+                }
             }
         });
 
