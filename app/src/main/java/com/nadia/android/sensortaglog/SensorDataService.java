@@ -105,20 +105,23 @@ public class SensorDataService extends Service {
                 enableHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //change period for magnetometer
-                        changePeriod(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-                                SensorDataModel.MAGNETOMETER_PERIOD);
+                        //change period for gyroscope
+                        changePeriod(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+                                SensorDataModel.GYRO_PERIOD);
                     }
                 }, 500);
 
                 enableHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //change period for gyroscope
-                        changePeriod(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
-                                SensorDataModel.GYRO_PERIOD);
+                        //change period for magnetometer
+                        changePeriod(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                SensorDataModel.MAGNETOMETER_PERIOD);
                     }
                 }, 1000);
+
+
+                //ENABLE SENSORS
 
                 enableHandler.postDelayed(new Runnable() {
                     @Override
@@ -130,16 +133,6 @@ public class SensorDataService extends Service {
                     }
                 }, 1500);
 
-                //enable Magnetometer sensor after 1 sec
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-                                (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
-                        Log.d(TAG, "Magnetometer sensor enabled");
-                    }
-                }, 2000);
-
                 //enable Gyroscope sensor
                 enableHandler.postDelayed(new Runnable() {
                     @Override
@@ -148,7 +141,19 @@ public class SensorDataService extends Service {
                                 (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_CONFIG"), true);
 
                     }
+                }, 2000);
+
+                //enable Magnetometer sensor after 1 sec
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
+                        Log.d(TAG, "Magnetometer sensor enabled");
+                    }
                 }, 2500);
+
+
 
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -164,17 +169,7 @@ public class SensorDataService extends Service {
                 //enable notifications for Accelerometer sensor
                 setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
                                 (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
-
-
-
-                //enable notifications for Magnetometer sensor
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
-                    }
-                }, 500);
+                Log.d(TAG, "Acc notifications enabled");
 
                 //enable notifications for Gyroscope sensor
                 enableHandler.postDelayed(new Runnable() {
@@ -184,7 +179,19 @@ public class SensorDataService extends Service {
                                 (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
                         Log.d(TAG, "Gyro notifications enabled");
                     }
+                }, 500);
+
+                //enable notifications for Magnetometer sensor
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
+                        Log.d(TAG, "Mag notifications enabled");
+                    }
                 }, 1000);
+
+
 
             } else {
                 Log.d(TAG, "Write operation returned status: " + status);
@@ -213,17 +220,19 @@ public class SensorDataService extends Service {
                 sendAccMessage(result[0], result[1], result[2]);
 
             }
+            else if (characteristic.getUuid().equals(SensorDataModel.GYRO_DATA)) {
+                float[] result = SensorDataModel.extractGyroValues(characteristic);
+                Log.d(TAG, "Gyroscope: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                sendGyroMessage(result[0], result[1], result[2]);
+            }
+
             else if (characteristic.getUuid().equals(SensorDataModel.MAGNETOMETER_DATA)) {
                 float[] result = SensorDataModel.extractMagValues(characteristic);
                 Log.d(TAG, "Magnetometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
                 sendMagMessage(result[0], result[1], result[2]);
 
             }
-            else if (characteristic.getUuid().equals(SensorDataModel.GYRO_DATA)) {
-                float[] result = SensorDataModel.extractGyroValues(characteristic);
-                Log.d(TAG, "Gyroscope: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
-                sendGyroMessage(result[0], result[1], result[2]);
-            }
+
         }
 
     };

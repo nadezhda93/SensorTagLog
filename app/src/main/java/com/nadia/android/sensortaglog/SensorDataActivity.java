@@ -54,18 +54,11 @@ public class SensorDataActivity extends Activity {
 
     private SensorDataSQLiteHelper db = new SensorDataSQLiteHelper(this);
 
-    private Button mRecordAccButton;
-    private Button mRecordGyroButton;
-    private Button mRecordMagButton;
+    private Button mRecordButton;
+    private Button mPlotButton;
 
-    private Boolean mRecordAccButtonPressOnce = false;
-    private Boolean mRecordAccButtonPressTwice = false;
-
-    private Boolean mRecordGyroButtonPressOnce = false;
-    private Boolean mRecordGyroButtonPressTwice = false;
-
-    private Boolean mRecordMagButtonPressOnce = false;
-    private Boolean mRecordMagButtonPressTwice = false;
+    private Boolean mRecordButtonPressOnce = false;
+    private Boolean mRecordButtonPressTwice = false;
 
     SimpleDateFormat mDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS");
 
@@ -121,10 +114,9 @@ public class SensorDataActivity extends Activity {
         mMagnetometerValue  = (TextView)findViewById(R.id.mag_value);
         mGyroscopeValue     = (TextView)findViewById(R.id.gyro_value);
 
-        //wire Button widgets for Recording data
-        mRecordAccButton    = (Button)findViewById(R.id.acc_record_button);
-        mRecordGyroButton   = (Button)findViewById(R.id.gyro_record_button);
-        mRecordMagButton    = (Button) findViewById(R.id.mag_record_button);
+        //wire Button widgets for Recording data and plotting
+        mRecordButton       = (Button)findViewById(R.id.record_button);
+        mPlotButton         = (Button)findViewById(R.id.plot_button);
 
 
         //Register to receive broadcasts for Magnetometer
@@ -137,74 +129,29 @@ public class SensorDataActivity extends Activity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mGyroMessageReceiver,
                                                                 new IntentFilter(GYROSCOPE_INTENT_FILTER));
 
-        //set listener for the RecordAccButton
-        mRecordAccButton.setOnClickListener(new View.OnClickListener() {
+        //set listener for the RecordButton to start recording for all three sensors
+        mRecordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //If record button has been pressed already, stop recording
-                if(mRecordAccButtonPressOnce){
-                    mRecordAccButtonPressTwice = true;
-                    mRecordAccButtonPressOnce = false;
-                    mRecordAccButton.setText("Record");
-                    Log.d(TAG, "mRecordAccButton was pressed again");
-                    Toast.makeText(SensorDataActivity.this, "Accelerometer recording saved.", Toast.LENGTH_SHORT).show();
+                if(mRecordButtonPressOnce){
+                    mRecordButtonPressTwice = true;
+                    mRecordButtonPressOnce = false;
+                    mRecordButton.setText("Start Recording");
+                    Log.d(TAG, "mRecordButton was pressed again");
+                    Toast.makeText(SensorDataActivity.this, "Recordings saved.", Toast.LENGTH_SHORT).show();
+                    mPlotButton.setEnabled(true);      //enable plot button after recording
                 }
                 else{
                     //set a flag that button has been pressed once
-                    //change text in button to read Stop
-                    mRecordAccButtonPressOnce = true;
-                    mRecordAccButtonPressTwice = false;
-                    mRecordAccButton.setText(" Stop ");
-                    Log.d(TAG, "mRecordAccButton was pressed");
+                    //change text in button to read Stop Recording
+                    mRecordButtonPressOnce = true;
+                    mRecordButtonPressTwice = false;
+                    mRecordButton.setText("Stop Recording");
+                    Log.d(TAG, "mRecordButton was pressed");
+                    Toast.makeText(SensorDataActivity.this, "Recording data ...", Toast.LENGTH_LONG).show();
+                    mPlotButton.setEnabled(false);      //disable plot button when recording
                 }
-            }
-        });
-
-        mRecordGyroButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //If record button has been pressed already, stop recording
-                if(mRecordGyroButtonPressOnce){
-                    mRecordGyroButtonPressTwice = true;
-                    mRecordGyroButtonPressOnce = false;
-                    mRecordGyroButton.setText("Record");
-                    Log.d(TAG, "mRecordGyroButton was pressed again");
-                    Toast.makeText(SensorDataActivity.this, "Gyroscope recording saved.", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    //set a flag that button has been pressed once
-                    //change text in button to read Stop
-                    mRecordGyroButtonPressOnce = true;
-                    mRecordGyroButtonPressTwice = false;
-                    mRecordGyroButton.setText(" Stop ");
-                    Log.d(TAG, "mRecordGyroButton was pressed");
-
-                }
-
-            }
-        });
-
-        mRecordMagButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //If record button has been pressed already, stop recording
-                if(mRecordMagButtonPressOnce){
-                    mRecordMagButtonPressTwice = true;
-                    mRecordMagButtonPressOnce = false;
-                    mRecordMagButton.setText("Record");
-                    Log.d(TAG, "mRecordMagButton was pressed again");
-                    Toast.makeText(SensorDataActivity.this, "Magnitude recording saved.", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    //set a flag that button has been pressed once
-                    //change text in button to read Stop
-                    mRecordMagButtonPressOnce = true;
-                    mRecordMagButtonPressTwice = false;
-                    mRecordMagButton.setText(" Stop ");
-                    Log.d(TAG, "mRecordMagButton was pressed");
-
-                }
-
             }
         });
     }
@@ -244,7 +191,7 @@ public class SensorDataActivity extends Activity {
 
             //add values to table only if Record button was pressed
             //Otherwise do nothing incl. if Stop button was pressed
-            if(mRecordAccButtonPressOnce) {
+            if(mRecordButtonPressOnce) {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
                 db.addToDatabaseTable((float) resultX, (float) resultY, (float) resultZ,
@@ -273,7 +220,7 @@ public class SensorDataActivity extends Activity {
                     result_y + " z = " +
                     result_z + " deg");
 
-            if(mRecordGyroButtonPressOnce) {
+            if(mRecordButtonPressOnce) {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
 
@@ -300,7 +247,7 @@ public class SensorDataActivity extends Activity {
             mMagnetometerValue.setText("x = " + result_x + " y = " +
                                                 result_y + " z = " +
                                                 result_z + " uT");
-            if(mRecordMagButtonPressOnce) {
+            if(mRecordButtonPressOnce) {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
                 //add values to table
