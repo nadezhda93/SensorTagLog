@@ -1,8 +1,6 @@
 package com.nadia.android.sensortaglog;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,24 +9,14 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * Created by nadia on 17/11/14.
@@ -37,12 +25,15 @@ import java.util.UUID;
  */
 public class SensorDataActivity extends Activity {
     private static final String TAG = "SensorDataActivity";
-    public static final String EXTRAS_DEVICE_NAME = "ExtrasDeviceName";
+    public static final String EXTRAS_DEVICE_NAME    = "ExtrasDeviceName";
     public static final String EXTRAS_DEVICE_ADDRESS = "ExtrasDeviceAddress";
 
-    public static final String ACCELEROMETER_INTENT_FILTER = "com.nadia.android.sensortaglog.Accelerometer";
-    public static final String GYROSCOPE_INTENT_FILTER = "com.nadia.android.sensortaglog.Gyroscope";
-    public static final String MAGNETOMETER_INTENT_FILTER = "com.nadia.android.sensortaglog.Magnetometer";
+    public static final String ACCELEROMETER_INTENT_FILTER
+                                = "com.nadia.android.sensortaglog.Accelerometer";
+    public static final String GYROSCOPE_INTENT_FILTER
+                                = "com.nadia.android.sensortaglog.Gyroscope";
+    public static final String MAGNETOMETER_INTENT_FILTER
+                                = "com.nadia.android.sensortaglog.Magnetometer";
 
     private String mDeviceName;
     private String mDeviceAddress;
@@ -57,7 +48,7 @@ public class SensorDataActivity extends Activity {
     private Button mRecordButton;
     private Button mPlotButton;
 
-    private Boolean mRecordButtonPressOnce = false;
+    private Boolean mRecordButtonPressOnce  = false;
     private Boolean mRecordButtonPressTwice = false;
 
     SimpleDateFormat mDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS");
@@ -78,13 +69,11 @@ public class SensorDataActivity extends Activity {
             //received in the Intent
             mSensorDataService.gattConnect(mDeviceAddress);
         }
-
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             mSensorDataService = null;
         }
     };
-
 
     //////////////////// Activity Lifecycle methods ////////////////////////////
     @Override
@@ -121,13 +110,13 @@ public class SensorDataActivity extends Activity {
 
         //Register to receive broadcasts for Magnetometer
         LocalBroadcastManager.getInstance(this).registerReceiver(mMagnetometerMessageReceiver,
-                                                                new IntentFilter(MAGNETOMETER_INTENT_FILTER));
+                                               new IntentFilter(MAGNETOMETER_INTENT_FILTER));
         //Register to receive broadcasts for Accelerometer
         LocalBroadcastManager.getInstance(this).registerReceiver(mAccMessageReceiver,
-                                                                new IntentFilter(ACCELEROMETER_INTENT_FILTER));
+                                               new IntentFilter(ACCELEROMETER_INTENT_FILTER));
         //Register to receive broadcasts for Gyro
         LocalBroadcastManager.getInstance(this).registerReceiver(mGyroMessageReceiver,
-                                                                new IntentFilter(GYROSCOPE_INTENT_FILTER));
+                                               new IntentFilter(GYROSCOPE_INTENT_FILTER));
 
         //set listener for the RecordButton to start recording for all three sensors
         mRecordButton.setOnClickListener(new View.OnClickListener() {
@@ -139,7 +128,8 @@ public class SensorDataActivity extends Activity {
                     mRecordButtonPressOnce = false;
                     mRecordButton.setText("Start Recording");
                     Log.d(TAG, "mRecordButton was pressed again");
-                    Toast.makeText(SensorDataActivity.this, "Recordings saved.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SensorDataActivity.this, "Recordings saved.",
+                                                        Toast.LENGTH_SHORT).show();
                     mPlotButton.setEnabled(true);      //enable plot button after recording
                 }
                 else{
@@ -149,7 +139,8 @@ public class SensorDataActivity extends Activity {
                     mRecordButtonPressTwice = false;
                     mRecordButton.setText("Stop Recording");
                     Log.d(TAG, "mRecordButton was pressed");
-                    Toast.makeText(SensorDataActivity.this, "Recording data ...", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SensorDataActivity.this, "Recording data ...",
+                                                        Toast.LENGTH_LONG).show();
                     mPlotButton.setEnabled(false);      //disable plot button when recording
                 }
             }
@@ -166,10 +157,7 @@ public class SensorDataActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMagnetometerMessageReceiver);
     }
 
-
-
-    //Handler for received events
-
+    //Handler for received messages from broadcast
     private BroadcastReceiver mAccMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -182,7 +170,8 @@ public class SensorDataActivity extends Activity {
             String result_x = String.format("%.2f", resultX);
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
-            Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = " + result_y + " z = "+result_z);
+            Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = "
+                                                      + result_y + " z = " +result_z);
 
             mAccelerometerValue.setText("x = " + result_x + " y = " +
                     result_y + " z = " +
@@ -214,7 +203,8 @@ public class SensorDataActivity extends Activity {
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
 
-            Log.d(TAG, "Received Gyroscope: x = " + result_x + " y = " + result_y + " z = "+result_z);
+            Log.d(TAG, "Received Gyroscope: x = " + result_x + " y = "
+                                                  + result_y + " z = "+result_z);
 
             mGyroscopeValue.setText("x = " + result_x + " y = " +
                     result_y + " z = " +
@@ -227,7 +217,6 @@ public class SensorDataActivity extends Activity {
                 //add values to table
                 db.addToDatabaseTable(resultX,resultY, resultZ, timestamp, GYROSCOPE_INTENT_FILTER);
             }
-
         }
     };
 
@@ -243,7 +232,8 @@ public class SensorDataActivity extends Activity {
             String result_x = String.format("%.2f", resultX);
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
-            Log.d(TAG, "Received Magnetometer: x = " + result_x + " y = " + result_y + " z = "+result_z);
+            Log.d(TAG, "Received Magnetometer: x = " + result_x + " y = "
+                                                     + result_y + " z = "+result_z);
             mMagnetometerValue.setText("x = " + result_x + " y = " +
                                                 result_y + " z = " +
                                                 result_z + " uT");
@@ -251,12 +241,9 @@ public class SensorDataActivity extends Activity {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
                 //add values to table
-                db.addToDatabaseTable(resultX,resultY, resultZ, timestamp, MAGNETOMETER_INTENT_FILTER);
+                db.addToDatabaseTable(resultX,resultY, resultZ, timestamp,
+                                              MAGNETOMETER_INTENT_FILTER);
             }
-
         }
     };
-
-
-
 }

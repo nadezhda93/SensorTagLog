@@ -1,7 +1,6 @@
 package com.nadia.android.sensortaglog;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +18,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.os.Handler;
 import java.util.ArrayList;
-
 
 public class BluetoothActivity extends Activity {
     private static final String TAG = "BluetoothActivity";
@@ -54,7 +52,6 @@ public class BluetoothActivity extends Activity {
                     });
                 }
             };
-
 
     //2. startLeScan implementation - find LE devices only scan for SCAN_PERIOD milliseconds
     private void scanLeDevice(final boolean enable) {
@@ -104,11 +101,11 @@ public class BluetoothActivity extends Activity {
             startActivityForResult(turnOn, 0);
         }
 
-
         //wire up ListView widget by resource ID
         mDevicesListView = (ListView) findViewById(R.id.devices_found_list);
         //set the adapter to the listView in the layout using default android list layout
-        mDevicesAdapter = new CustomListAdapter(this, android.R.layout.simple_list_item_1, mListOfDevices);
+        mDevicesAdapter = new CustomListAdapter(this,
+                            android.R.layout.simple_list_item_1, mListOfDevices);
         mDevicesListView.setAdapter(mDevicesAdapter);
 
         //respond to clicks in the list view, call method gattConnect() on clicked item
@@ -125,22 +122,24 @@ public class BluetoothActivity extends Activity {
                 if(clicked_device.getName() != null) {
                     if (clicked_device.getName().equals("SensorTag")) {
                         Log.d(TAG, clicked_device.getName() + " was clicked");
-                        final Intent intent = new Intent(BluetoothActivity.this, SensorDataActivity.class);
-                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_NAME, clicked_device.getName());
-                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_ADDRESS, clicked_device.getAddress());
-                        //open new page/activity to display the available services (sensors) as a list again
+                        final Intent intent = new Intent(BluetoothActivity.this,
+                                                   SensorDataActivity.class);
+                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_NAME,
+                                                   clicked_device.getName());
+                        intent.putExtra(SensorDataActivity.EXTRAS_DEVICE_ADDRESS,
+                                                   clicked_device.getAddress());
+                        //open new page/activity to display the available services
                         //onStop() is called here
                         startActivity(intent);
                     }
                 }
                 else {
                     //Display a message requiring the device to be a SensorTag
-                    Toast.makeText(BluetoothActivity.this, "Device must be a SensorTag.",Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, clicked_device.getName() + " clicked");
+                    Toast.makeText(BluetoothActivity.this, "Device must be a SensorTag.",
+                                                     Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
     }
 
     //called when a new semi-transparent activity partially obscures the current activity
@@ -172,8 +171,6 @@ public class BluetoothActivity extends Activity {
     protected void onDestroy(){
         super.onDestroy();
         scanLeDevice(false);
-
-
     }
 
     @Override
@@ -194,13 +191,12 @@ public class BluetoothActivity extends Activity {
                scanLeDevice(true);
                return true;
 
-            case R.id.action_settings:
+           case R.id.action_settings:
                 //do something when you press overflow and settings
-                return true;
+               return true;
 
-            default:
-                return super.onOptionsItemSelected(item);
+           default:
+               return super.onOptionsItemSelected(item);
         }
-
     }
 }

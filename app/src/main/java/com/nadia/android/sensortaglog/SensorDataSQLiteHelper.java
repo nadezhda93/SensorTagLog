@@ -6,29 +6,26 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
-
 import java.io.File;
-import java.util.Date;
-import java.text.SimpleDateFormat;
+
 
 
 /**
  * Created by nadia on 01/12/14. Database to store the broadcasted results of the
- * Accelerometer in a table format with a timestamp. Currently saves db file in system storage.
+ * Accelerometer, gyro and mag in a table format with a timestamp.
+ * Currently saves db file in system storage.
  */
 public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
-    private static final String TAG = "SensorDataSQLiteHelper";
+    private static final String TAG           = "SensorDataSQLiteHelper";
     private static final String DATABASE_NAME = "SensorTagDataBase";
     private static final int DATABASE_VERSION = 1;
-
-    private static final String FILE_DIR = "SensorTagLog";
-
+    private static final String FILE_DIR      = "SensorTagLog";
 
     //table names
     private static final String TABLE_ACCELEROMETER  = "Accelerometer";
-    private static final String TABLE_GYROSCOPE     = "Gyroscope";
-    private static final String TABLE_MAGNETOMETER  = "Magnetometer";
+    private static final String TABLE_GYROSCOPE      = "Gyroscope";
+    private static final String TABLE_MAGNETOMETER   = "Magnetometer";
 
     //table column names
     private static final String TIME = "time";
@@ -55,7 +52,6 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
                                                               "x REAL, "+
                                                               "y REAL, "+
                                                               "z REAL)";
-
     //class constructor
     public SensorDataSQLiteHelper(Context context){
         super(context, Environment.getExternalStorageDirectory()
@@ -74,14 +70,12 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
     //upgrading the database to a newer version
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion){
-        // Drop older Acceleration table if existed
+        // drop older tables if existed
         database.execSQL("DROP TABLE IF EXISTS Acceleration");
         database.execSQL("DROP TABLE IF EXISTS Gyroscope");
         database.execSQL("DROP TABLE IF EXISTS Magnetometer");
-
-        // create fresh books table
+        // create fresh tables
         this.onCreate(database);
-
     }
 
 
@@ -89,32 +83,29 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     public void addToDatabaseTable(float x, float y, float z, String timestamp, String table){
         Log.d(TAG, "addToDatabaseTable called");
 
-
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-
         // 2. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
         values.put(TIME, timestamp); // put timestamp
         values.put(X, x);
         values.put(Y, y);
         values.put(Z, z);
-
         // 3. insert into required table
         if(table.equals(SensorDataActivity.ACCELEROMETER_INTENT_FILTER)) {
             db.insert(TABLE_ACCELEROMETER, // table
-                    null, //nullColumnHack
+                    null,    //nullColumnHack
                     values); // key/value -> keys = column names/ values = column values
         }
         else if (table.equals(SensorDataActivity.GYROSCOPE_INTENT_FILTER)){
             db.insert(TABLE_GYROSCOPE, // table
-                    null, //nullColumnHack
+                    null,    //nullColumnHack
                     values); // key/value -> keys = column names/ values = column values
 
         }
         else if(table.equals(SensorDataActivity.MAGNETOMETER_INTENT_FILTER)){
             db.insert(TABLE_MAGNETOMETER, // table
-                    null, //nullColumnHack
+                    null,    //nullColumnHack
                     values); // key/value -> keys = column names/ values = column values
         }
         else{

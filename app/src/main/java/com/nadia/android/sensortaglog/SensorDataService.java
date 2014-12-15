@@ -15,20 +15,15 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by nadia on 22/11/14.
  * A Bound Service which is used to connect to GattServer, set notifications for the SensorTag
  * sensors and send the readings to the SensorDataActivity using BroadcastReceiver.
+ * Based on BluetoothLeGatt service by Android dev
  */
 public class SensorDataService extends Service {
     private final static String TAG = "SensorDataService";
@@ -57,7 +52,6 @@ public class SensorDataService extends Service {
         //initialise bluetooth adapter through BluetoothManager
         sBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         sBluetoothAdapter = sBluetoothManager.getAdapter();
-
         return true;
     }
 
@@ -70,7 +64,6 @@ public class SensorDataService extends Service {
         }
 
         final BluetoothDevice sDevice = sBluetoothAdapter.getRemoteDevice(address);
-
         // Set AutoConnect parameter to false to connect to device
         sConnectedGatt = sDevice.connectGatt(this, false, mGattCallback);
         Log.d(TAG, "Trying to create a new connection.");
@@ -89,11 +82,12 @@ public class SensorDataService extends Service {
                 // Attempts to discover services after successful connection.
                 Log.d(TAG, "Attempting to start service discovery:" + gatt.discoverServices());
 
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            }
+            else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "Disconnected from GATT server");
             }
         }
-
+        //when discovery of services and characteristics completes
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -120,13 +114,11 @@ public class SensorDataService extends Service {
                     }
                 }, 1000);
 
-
                 //ENABLE SENSORS
-
                 enableHandler.postDelayed(new Runnable() {
                     @Override
                    public void run() {
-                        //enable Accelerometer sensor
+                //enable Accelerometer sensor
                         enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
                                 (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_CONFIG"), true);
                         Log.d(TAG, "Accelerometer sensor enabled");
@@ -152,19 +144,16 @@ public class SensorDataService extends Service {
                         Log.d(TAG, "Magnetometer sensor enabled");
                     }
                 }, 2500);
-
-
-
-            } else {
+            }
+            else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
         }
-
+        //when a write operation completes
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "Write operation successful");
-
 
                 //enable notifications for Accelerometer sensor
                 setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
@@ -190,15 +179,12 @@ public class SensorDataService extends Service {
                         Log.d(TAG, "Mag notifications enabled");
                     }
                 }, 1000);
-
-
-
-            } else {
+            }
+            else {
                 Log.d(TAG, "Write operation returned status: " + status);
             }
         }
-
-
+        //when a data read request comes in
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
@@ -211,30 +197,32 @@ public class SensorDataService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-
             //check for which service the characteristic is received and send appropriate broadcast
             if (characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
                 //Log the value of the sensor and send to SensorDataActivity to display using an Intent
                 double[] result = SensorDataModel.extractAccelerometerValues(characteristic);
-                Log.d(TAG, "Accelerometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                Log.d(TAG, "Accelerometer: x = " + result[0] + " " +
+                                         " y = " + result[1] + " " +
+                                         " z = " + result[2]);
                 sendAccMessage(result[0], result[1], result[2]);
 
             }
             else if (characteristic.getUuid().equals(SensorDataModel.GYRO_DATA)) {
                 float[] result = SensorDataModel.extractGyroValues(characteristic);
-                Log.d(TAG, "Gyroscope: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                Log.d(TAG, "Gyroscope: x = " + result[0] +
+                                     " y = " + result[1] +
+                                     " z = " + result[2]);
                 sendGyroMessage(result[0], result[1], result[2]);
             }
 
             else if (characteristic.getUuid().equals(SensorDataModel.MAGNETOMETER_DATA)) {
                 float[] result = SensorDataModel.extractMagValues(characteristic);
-                Log.d(TAG, "Magnetometer: x = " + result[0] + " y = " + result[1] + " z = " + result[2]);
+                Log.d(TAG, "Magnetometer: x = " + result[0] +
+                                        " y = " + result[1] +
+                                        " z = " + result[2]);
                 sendMagMessage(result[0], result[1], result[2]);
-
             }
-
         }
-
     };
 
     //Turn on a sensor (SensorTag manual)
@@ -260,12 +248,12 @@ public class SensorDataService extends Service {
             }
         }
         else {
-            config.setValue(new byte[]{0});     //Disable sensor
+            config.setValue(new byte[]{0});         //Disable sensor
             Log.d(TAG, "Sensor disabled");
         }
-        bluetoothGatt.writeCharacteristic(config);
+        bluetoothGatt.writeCharacteristic(config);  //write to characteristic
     }
-
+    //Changing period by writing to period UUID of each sensor to 1 Hz
     private void changePeriod(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID periodUuid){
         BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
         BluetoothGattCharacteristic sensorPeriod = sensorService.getCharacteristic(periodUuid);
@@ -285,22 +273,21 @@ public class SensorDataService extends Service {
         BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
         BluetoothGattCharacteristic serviceDataCharacteristic = sensorService.getCharacteristic(dataUuid);
 
-        if(enable) {
-            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, true); //enabled locally
+        if(enable) { //enabled locally
+            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, true);
             BluetoothGattDescriptor configDescriptor = serviceDataCharacteristic.getDescriptor(CCC);
             configDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(configDescriptor); //enabled remotely
             Log.d(TAG, "Notifications set" + configDescriptor.getValue());
         }
-        else {
-            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, false); //disabled locally
+        else {       //disabled locally
+            bluetoothGatt.setCharacteristicNotification(serviceDataCharacteristic, false);
             BluetoothGattDescriptor configDescriptor = serviceDataCharacteristic.getDescriptor(CCC);
             configDescriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
             bluetoothGatt.writeDescriptor(configDescriptor); //disabled remotely
             Log.d(TAG, "Notifications disabled");
         }
     }
-
 
     //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendMagMessage(float x, float y, float z){
@@ -336,7 +323,6 @@ public class SensorDataService extends Service {
     }
 
     /////////////////////// Service Lifecycle methods   /////////////////////////
-
     //called when an activity binds to the service
     @Override
     public IBinder onBind(Intent intent) {
@@ -349,9 +335,6 @@ public class SensorDataService extends Service {
     public boolean onUnbind(Intent intent) {
         // make sure all connections to Gatt device are closed
         sConnectedGatt.disconnect();
-
         return super.onUnbind(intent);
     }
-
-
 }
