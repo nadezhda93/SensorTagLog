@@ -35,6 +35,8 @@ public class SensorDataActivity extends Activity {
     public static final String MAGNETOMETER_INTENT_FILTER
                                 = "com.nadia.android.sensortaglog.Magnetometer";
 
+    private int recID = 1;
+
     private String mDeviceName;
     private String mDeviceAddress;
     private SensorDataService mSensorDataService;
@@ -131,6 +133,7 @@ public class SensorDataActivity extends Activity {
                     Toast.makeText(SensorDataActivity.this, "Recordings saved.",
                                                         Toast.LENGTH_SHORT).show();
                     mPlotButton.setEnabled(true);      //enable plot button after recording
+                    recID += 1;                        //increment to next recording
                 }
                 else{
                     //set a flag that button has been pressed once
@@ -142,6 +145,7 @@ public class SensorDataActivity extends Activity {
                     Toast.makeText(SensorDataActivity.this, "Recording data ...",
                                                         Toast.LENGTH_LONG).show();
                     mPlotButton.setEnabled(false);      //disable plot button when recording
+
                 }
             }
         });
@@ -183,7 +187,7 @@ public class SensorDataActivity extends Activity {
             if(mRecordButtonPressOnce) {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
-                db.addToDatabaseTable((float) resultX, (float) resultY, (float) resultZ,
+                db.addToDatabaseTable(recID, (float) resultX, (float) resultY, (float) resultZ,
                         timestamp, ACCELEROMETER_INTENT_FILTER);
                 Log.d(TAG, "Entry added to table");
             }
@@ -215,7 +219,7 @@ public class SensorDataActivity extends Activity {
                 String timestamp = mDateFormat.format(new Date());
 
                 //add values to table
-                db.addToDatabaseTable(resultX,resultY, resultZ, timestamp, GYROSCOPE_INTENT_FILTER);
+                db.addToDatabaseTable(recID, resultX,resultY, resultZ, timestamp, GYROSCOPE_INTENT_FILTER);
             }
         }
     };
@@ -241,7 +245,7 @@ public class SensorDataActivity extends Activity {
                 //get current date, time in the format defined
                 String timestamp = mDateFormat.format(new Date());
                 //add values to table
-                db.addToDatabaseTable(resultX,resultY, resultZ, timestamp,
+                db.addToDatabaseTable(recID, resultX,resultY, resultZ, timestamp,
                                               MAGNETOMETER_INTENT_FILTER);
             }
         }

@@ -2,6 +2,7 @@ package com.nadia.android.sensortaglog;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
@@ -28,26 +29,30 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     private static final String TABLE_MAGNETOMETER   = "Magnetometer";
 
     //table column names
+    private static final String RECID  = "recID";
     private static final String TIME = "time";
     private static final String X    = "x";
     private static final String Y    = "y";
     private static final String Z    = "z";
 
-    private static final String[] COLUMNS = {TIME,X,Y,Z};
+    private static final String[] COLUMNS = {RECID,TIME,X,Y,Z}; //for query
 
     private static final String CREATE_ACCELEROMETER_TABLE = "CREATE TABLE Accelerometer ( " +
+                                                              "recID INTEGER,"    +
                                                               "time TEXT, " +
                                                               "x REAL, "+
                                                               "y REAL, "+
                                                               "z REAL)";
 
     private static final String CREATE_GYROSCOPE_TABLE = "CREATE TABLE Gyroscope ( " +
+                                                              "recID INTEGER,"    +
                                                               "time TEXT, " +
                                                               "x REAL, "+
                                                               "y REAL, "+
                                                               "z REAL)";
 
     private static final String CREATE_MAGNETOMETER_TABLE = "CREATE TABLE Magnetometer ( " +
+                                                              "recID INTEGER,"    +
                                                               "time TEXT, " +
                                                               "x REAL, "+
                                                               "y REAL, "+
@@ -71,7 +76,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     //upgrading the database to a newer version
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion){
         // drop older tables if existed
-        database.execSQL("DROP TABLE IF EXISTS Acceleration");
+        database.execSQL("DROP TABLE IF EXISTS Accelerometer");
         database.execSQL("DROP TABLE IF EXISTS Gyroscope");
         database.execSQL("DROP TABLE IF EXISTS Magnetometer");
         // create fresh tables
@@ -80,18 +85,26 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
 
     //add new accelerometer entry to table
-    public void addToDatabaseTable(float x, float y, float z, String timestamp, String table){
+    public void addToDatabaseTable(int recID, float x, float y, float z, String timestamp, String table){
         Log.d(TAG, "addToDatabaseTable called");
 
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-        // 2. create ContentValues to add key "column"/value
+        // 2. get number of last recording by query
+        //recID = queryDatabase("Accelerometer");
+
+        //increment by one if a recording exists
+       // recID = recID_old + 1;
+        //if no recordings, set ID to 1
+        //recID = 1;
+        // 3. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
+        values.put(RECID, recID);
         values.put(TIME, timestamp); // put timestamp
         values.put(X, x);
         values.put(Y, y);
         values.put(Z, z);
-        // 3. insert into required table
+        // 4. insert into required table
         if(table.equals(SensorDataActivity.ACCELEROMETER_INTENT_FILTER)) {
             db.insert(TABLE_ACCELEROMETER, // table
                     null,    //nullColumnHack
@@ -113,5 +126,16 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         }
         // 4. close the database
         db.close();
+    }
+
+    //query database for last entry recID
+    public int queryDatabase(String table) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT  * FROM " + table;
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        cursor.moveToLast();
+        int ID = cursor.getInt(0);
+        Log.d(TAG, "recording id = " + ID);
+        return ID;
     }
 }
