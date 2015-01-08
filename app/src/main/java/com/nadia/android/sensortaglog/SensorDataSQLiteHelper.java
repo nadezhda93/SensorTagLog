@@ -2,6 +2,7 @@ package com.nadia.android.sensortaglog;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -57,11 +58,15 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
                                                               "x REAL, "+
                                                               "y REAL, "+
                                                               "z REAL)";
+
+    private Context context;
+
     //class constructor
     public SensorDataSQLiteHelper(Context context){
         super(context, Environment.getExternalStorageDirectory()
                 + File.separator + FILE_DIR
                 + File.separator + DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
         Log.d(TAG, "Database created");
     }
 
@@ -129,13 +134,24 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     }
 
     //query database for last entry recID
-    public int queryDatabase(String table) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String selectQuery = "SELECT  * FROM " + table;
-        Cursor cursor = db.rawQuery(selectQuery, null);
+    public int queryDatabase() {
+        SQLiteDatabase db_read = this.getReadableDatabase();
+        String selectQuery = "SELECT  * FROM Accelerometer";
+        Cursor cursor = db_read.rawQuery(selectQuery, null);
         cursor.moveToLast();
         int ID = cursor.getInt(0);
         Log.d(TAG, "recording id = " + ID);
+        db_read.close();
+
         return ID;
+
+    }
+
+    public boolean doesDatabaseExist() {
+        File dbFile = this.context.getDatabasePath(Environment.getExternalStorageDirectory()
+                + File.separator + FILE_DIR
+                + File.separator + DATABASE_NAME);
+        Log.d(TAG, "Does database exist? " + dbFile.exists());
+        return dbFile.exists();
     }
 }

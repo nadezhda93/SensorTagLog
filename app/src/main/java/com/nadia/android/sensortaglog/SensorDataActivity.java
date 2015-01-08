@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -15,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -35,7 +38,7 @@ public class SensorDataActivity extends Activity {
     public static final String MAGNETOMETER_INTENT_FILTER
                                 = "com.nadia.android.sensortaglog.Magnetometer";
 
-    private int recID = 1;
+    private int recID;
 
     private String mDeviceName;
     private String mDeviceAddress;
@@ -133,7 +136,6 @@ public class SensorDataActivity extends Activity {
                     Toast.makeText(SensorDataActivity.this, "Recordings saved.",
                                                         Toast.LENGTH_SHORT).show();
                     mPlotButton.setEnabled(true);      //enable plot button after recording
-                    recID += 1;                        //increment to next recording
                 }
                 else{
                     //set a flag that button has been pressed once
@@ -144,8 +146,16 @@ public class SensorDataActivity extends Activity {
                     Log.d(TAG, "mRecordButton was pressed");
                     Toast.makeText(SensorDataActivity.this, "Recording data ...",
                                                         Toast.LENGTH_LONG).show();
-                    mPlotButton.setEnabled(false);      //disable plot button when recording
-
+                    mPlotButton.setEnabled(false);         //disable plot button when recording
+                    //check if database exists and set recID accordingly
+                    if (db.doesDatabaseExist()) {
+                        //get the last recording number and increment
+                        recID = db.queryDatabase() + 1;
+                    }
+                    else{
+                        //database not created so initialise to 1
+                        recID = 1;
+                    }
                 }
             }
         });
@@ -174,8 +184,8 @@ public class SensorDataActivity extends Activity {
             String result_x = String.format("%.2f", resultX);
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
-            Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = "
-                                                      + result_y + " z = " +result_z);
+//            Log.d(TAG, "Received Accelerometer: x = " + result_x + " y = "
+//                                                      + result_y + " z = " +result_z);
 
             mAccelerometerValue.setText("x = " + result_x + " y = " +
                     result_y + " z = " +
@@ -207,8 +217,8 @@ public class SensorDataActivity extends Activity {
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
 
-            Log.d(TAG, "Received Gyroscope: x = " + result_x + " y = "
-                                                  + result_y + " z = "+result_z);
+//            Log.d(TAG, "Received Gyroscope: x = " + result_x + " y = "
+//                                                  + result_y + " z = "+result_z);
 
             mGyroscopeValue.setText("x = " + result_x + " y = " +
                     result_y + " z = " +
@@ -236,8 +246,8 @@ public class SensorDataActivity extends Activity {
             String result_x = String.format("%.2f", resultX);
             String result_y = String.format("%.2f", resultY);
             String result_z = String.format("%.2f", resultZ);
-            Log.d(TAG, "Received Magnetometer: x = " + result_x + " y = "
-                                                     + result_y + " z = "+result_z);
+//            Log.d(TAG, "Received Magnetometer: x = " + result_x + " y = "
+//                                                     + result_y + " z = "+result_z);
             mMagnetometerValue.setText("x = " + result_x + " y = " +
                                                 result_y + " z = " +
                                                 result_z + " uT");

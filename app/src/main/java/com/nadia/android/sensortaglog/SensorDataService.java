@@ -201,25 +201,25 @@ public class SensorDataService extends Service {
             if (characteristic.getUuid().equals(SensorDataModel.ACCELEROMETER_DATA)) {
                 //Log the value of the sensor and send to SensorDataActivity to display using an Intent
                 double[] result = SensorDataModel.extractAccelerometerValues(characteristic);
-                Log.d(TAG, "Accelerometer: x = " + result[0] + " " +
-                                         " y = " + result[1] + " " +
-                                         " z = " + result[2]);
+//                Log.d(TAG, "Accelerometer: x = " + result[0] + " " +
+//                                         " y = " + result[1] + " " +
+//                                         " z = " + result[2]);
                 sendAccMessage(result[0], result[1], result[2]);
 
             }
             else if (characteristic.getUuid().equals(SensorDataModel.GYRO_DATA)) {
                 float[] result = SensorDataModel.extractGyroValues(characteristic);
-                Log.d(TAG, "Gyroscope: x = " + result[0] +
-                                     " y = " + result[1] +
-                                     " z = " + result[2]);
+//                Log.d(TAG, "Gyroscope: x = " + result[0] +
+//                                     " y = " + result[1] +
+//                                     " z = " + result[2]);
                 sendGyroMessage(result[0], result[1], result[2]);
             }
 
             else if (characteristic.getUuid().equals(SensorDataModel.MAGNETOMETER_DATA)) {
                 float[] result = SensorDataModel.extractMagValues(characteristic);
-                Log.d(TAG, "Magnetometer: x = " + result[0] +
-                                        " y = " + result[1] +
-                                        " z = " + result[2]);
+//                Log.d(TAG, "Magnetometer: x = " + result[0] +
+//                                        " y = " + result[1] +
+//                                        " z = " + result[2]);
                 sendMagMessage(result[0], result[1], result[2]);
             }
         }
@@ -291,7 +291,7 @@ public class SensorDataService extends Service {
 
     //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendMagMessage(float x, float y, float z){
-        Log.d(TAG, "Broadcasting message magnetometer...");
+       // Log.d(TAG, "Broadcasting message magnetometer...");
         Intent intent = new Intent(SensorDataActivity.MAGNETOMETER_INTENT_FILTER);
         //include result with the intent
         intent.putExtra("RESULT x", x);
@@ -302,7 +302,7 @@ public class SensorDataService extends Service {
 
     //method that broadcasts the result of the accelerometer sensor read using an intent to activities
     private void sendAccMessage(double x, double y, double z){
-        Log.d(TAG, "Broadcasting message accelerometer...");
+       // Log.d(TAG, "Broadcasting message accelerometer...");
         Intent intent = new Intent(SensorDataActivity.ACCELEROMETER_INTENT_FILTER);
         //include results with intent, convert double to two decimal places string
         intent.putExtra("RESULT x", x);
@@ -313,7 +313,7 @@ public class SensorDataService extends Service {
 
         //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendGyroMessage(float x, float y, float z){
-         Log.d(TAG, "Broadcasting message gyroscope...");
+        // Log.d(TAG, "Broadcasting message gyroscope...");
          Intent intent = new Intent(SensorDataActivity.GYROSCOPE_INTENT_FILTER);
          //include result with the intent
          intent.putExtra("RESULT x", x);
