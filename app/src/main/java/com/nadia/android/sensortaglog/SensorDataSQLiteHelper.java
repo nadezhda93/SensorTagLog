@@ -138,6 +138,23 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         return ID;
 
     }
+    //query for all recordings made and set each to an object in RecordingsDataModel
+    public void queryRecordings(){
+        //find out what number is the last recording
+        int lastRecId = queryDatabase();
+
+        //cycle through the recordings by id
+        for (int i = 1 ; i < lastRecId+1; i++){
+            //1. get first row of the recording and get info
+
+
+            //2. get last row of recording and get info
+
+            //3. create object with info from 1. and 2.
+
+            //4. next recording
+        }
+    }
 
     public boolean doesDatabaseExist() {
         File dbFile = this.context.getDatabasePath(Environment.getExternalStorageDirectory()
