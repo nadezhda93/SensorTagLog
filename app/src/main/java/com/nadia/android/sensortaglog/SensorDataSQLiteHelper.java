@@ -95,21 +95,14 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-        // 2. get number of last recording by query
-        //recID = queryDatabase("Accelerometer");
-
-        //increment by one if a recording exists
-       // recID = recID_old + 1;
-        //if no recordings, set ID to 1
-        //recID = 1;
-        // 3. create ContentValues to add key "column"/value
+        // 2. create ContentValues to add key "column"/value
         ContentValues values = new ContentValues();
         values.put(RECID, recID);
         values.put(TIME, timestamp); // put timestamp
         values.put(X, x);
         values.put(Y, y);
         values.put(Z, z);
-        // 4. insert into required table
+        // 3. insert into required table
         if(table.equals(SensorDataActivity.ACCELEROMETER_INTENT_FILTER)) {
             db.insert(TABLE_ACCELEROMETER, // table
                     null,    //nullColumnHack
@@ -142,7 +135,6 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         int ID = cursor.getInt(0);
         Log.d(TAG, "recording id = " + ID);
         db_read.close();
-
         return ID;
 
     }

@@ -9,31 +9,22 @@ import java.util.UUID;
  */
 public class RecordingsDataModel {
 
-    private UUID mId;             //unique ID for each recording
-    private String mTitle;        //title of recording
+    private int mId;              //unique ID for each recording
     private String mStart;        //start of recording timestamp
     private String mEnd;          //end of recording timestamp
 
+
     //constructor
-    public RecordingsDataModel(String title, String start, String end){
-        mId = UUID.randomUUID();        //generate a unique number for recording
-        mTitle = title;
+    public RecordingsDataModel(int recId, String start, String end){
+        mId = recId;
         mStart = start;
         mEnd = end;
 
     }
 
     //getters and setters for member functions
-    public UUID getId(){
+    public int getId(){
         return mId;
-    }
-
-    public void setTitle(String title){
-        mTitle = title;
-    }
-
-    public String getTitle(){
-        return mTitle;
     }
 
     public void setStart(String start){

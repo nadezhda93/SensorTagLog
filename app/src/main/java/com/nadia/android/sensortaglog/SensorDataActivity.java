@@ -159,6 +159,16 @@ public class SensorDataActivity extends Activity {
                 }
             }
         });
+
+        //set listener for plot(recordings button) to start new activity
+        mPlotButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final Intent intent = new Intent(SensorDataActivity.this,
+                                      RecordingsDataActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -167,9 +177,12 @@ public class SensorDataActivity extends Activity {
         //unbind from service when back button is pressed and activity is destroyed
         unbindService(mServiceConnection);
         //unregister from broadcast
-        // Unregister since the activity is about to be closed.
+        //Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mAccMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mGyroMessageReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMagnetometerMessageReceiver);
     }
+
 
     //Handler for received messages from broadcast
     private BroadcastReceiver mAccMessageReceiver = new BroadcastReceiver() {

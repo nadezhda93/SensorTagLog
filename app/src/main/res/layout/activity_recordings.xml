@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id = "@+id/linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RecordingsDataActivity">
+ <TextView
+     android:id="@+id/select_rec_to_plot"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:text="@string/select_rec_to_plot"
+     android:textSize="12sp"
+     style="?android:listSeparatorTextViewStyle"/>
+
+
+    <ListView
+        android:id="@+id/recordings_found_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+</LinearLayout>
+
