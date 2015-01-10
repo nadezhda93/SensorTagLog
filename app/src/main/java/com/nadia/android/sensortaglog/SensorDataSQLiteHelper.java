@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import java.io.File;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -60,6 +61,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
                                                               "z REAL)";
 
     private Context context;
+    SQLiteDatabase db_read = this.getReadableDatabase();
 
     //class constructor
     public SensorDataSQLiteHelper(Context context){
@@ -128,32 +130,41 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
     //query database for last entry recID
     public int queryDatabase() {
-        SQLiteDatabase db_read = this.getReadableDatabase();
         String selectQuery = "SELECT  * FROM Accelerometer";
         Cursor cursor = db_read.rawQuery(selectQuery, null);
         cursor.moveToLast();
         int ID = cursor.getInt(0);
         Log.d(TAG, "recording id = " + ID);
-        db_read.close();
         return ID;
 
     }
     //query for all recordings made and set each to an object in RecordingsDataModel
-    public void queryRecordings(){
+    public ArrayList queryRecordings(){
         //find out what number is the last recording
         int lastRecId = queryDatabase();
+
+        //create an array to store objects
+        ArrayList<RecordingsDataModel> recordings =
+                new ArrayList<RecordingsDataModel>(lastRecId-1);
 
         //cycle through the recordings by id
         for (int i = 1 ; i < lastRecId+1; i++){
             //1. get first row of the recording and get info
-
-
+            String sql = "SELECT time FROM Accelerometer WHERE recID=" + i;
+            Cursor cursor = db_read.rawQuery(sql, null);
+            cursor.moveToFirst();
+            String t1 = cursor.getString(0);
+            //Log.d(TAG, "Timestamp first: " + t1 + "rec " + i);
             //2. get last row of recording and get info
+            cursor.moveToLast();
+            String t2 = cursor.getString(0);
+            //Log.d(TAG, "Timestamp last: " + t2 + "rec " + i);
 
-            //3. create object with info from 1. and 2.
-
-            //4. next recording
+            //3. create object with info from 1. and 2. append to array
+            RecordingsDataModel rec = new RecordingsDataModel(i, t1, t2);
+            recordings.add(rec);
         }
+        return recordings;
     }
 
     public boolean doesDatabaseExist() {

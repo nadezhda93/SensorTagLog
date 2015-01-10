@@ -291,7 +291,7 @@ public class SensorDataService extends Service {
 
     //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendMagMessage(float x, float y, float z){
-        Log.d(TAG, "Broadcasting message magnetometer...");
+        //Log.d(TAG, "Broadcasting message magnetometer...");
         Intent intent = new Intent(SensorDataActivity.MAGNETOMETER_INTENT_FILTER);
         //include result with the intent
         intent.putExtra("RESULT x", x);
@@ -302,7 +302,7 @@ public class SensorDataService extends Service {
 
     //method that broadcasts the result of the accelerometer sensor read using an intent to activities
     private void sendAccMessage(double x, double y, double z){
-        Log.d(TAG, "Broadcasting message accelerometer...");
+        //Log.d(TAG, "Broadcasting message accelerometer...");
         Intent intent = new Intent(SensorDataActivity.ACCELEROMETER_INTENT_FILTER);
         //include results with intent, convert double to two decimal places string
         intent.putExtra("RESULT x", x);
@@ -313,7 +313,7 @@ public class SensorDataService extends Service {
 
         //method that broadcasts the result of the magnetometer sensor read using an intent to activities
     private void sendGyroMessage(float x, float y, float z){
-         Log.d(TAG, "Broadcasting message gyroscope...");
+         //Log.d(TAG, "Broadcasting message gyroscope...");
          Intent intent = new Intent(SensorDataActivity.GYROSCOPE_INTENT_FILTER);
          //include result with the intent
          intent.putExtra("RESULT x", x);
