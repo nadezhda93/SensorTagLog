@@ -61,7 +61,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
                                                               "z REAL)";
 
     private Context context;
-    SQLiteDatabase db_read = this.getReadableDatabase();
+
 
     //class constructor
     public SensorDataSQLiteHelper(Context context){
@@ -130,6 +130,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
     //query database for last entry recID
     public int queryDatabase() {
+        SQLiteDatabase db_read = this.getReadableDatabase();
         String selectQuery = "SELECT  * FROM Accelerometer";
         Cursor cursor = db_read.rawQuery(selectQuery, null);
         cursor.moveToLast();
@@ -142,6 +143,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     public ArrayList queryRecordings(){
         //find out what number is the last recording
         int lastRecId = queryDatabase();
+        SQLiteDatabase db_read = this.getReadableDatabase();
 
         //create an array to store objects
         ArrayList<RecordingsDataModel> recordings =
