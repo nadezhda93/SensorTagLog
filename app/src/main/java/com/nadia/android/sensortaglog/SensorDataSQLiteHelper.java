@@ -9,7 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import java.io.File;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -167,6 +170,27 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
             recordings.add(rec);
         }
         return recordings;
+    }
+
+    public ArrayList<String> queryTimestamps(int recId){
+        SQLiteDatabase db_read = this.getReadableDatabase();
+        //create an array to store timestamps
+        ArrayList<String> timestamps = new ArrayList<String>();
+        //query string
+        String sql = "SELECT time FROM Accelerometer WHERE recID=" + recId;
+        Cursor cursor = db_read.rawQuery(sql, null);
+        int rows = cursor.getCount(); //get number of rows
+        Log.d(TAG, "Rows in rec: " + rows);
+        cursor.moveToFirst();
+
+        //go through all rows in cursor
+        for (int i = 0; i<rows; i++){
+            String time = cursor.getString(0);
+            Log.d(TAG, "Timestamp " + i + " = " + time);
+            timestamps.add(time);
+            cursor.moveToNext();
+        }
+        return timestamps;
     }
 
     public boolean doesDatabaseExist() {
