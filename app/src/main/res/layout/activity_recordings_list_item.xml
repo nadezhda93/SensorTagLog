@@ -1,23 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="55dip"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginStart="30dp"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/expandable_list_item"
-        android:layout_width="fill_parent"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="17dip"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+        android:orientation="horizontal"
+        android:layout_marginStart="30dp">
 
-    <!--<CheckBox
-        android:id="@+id/checkBoxAcc"
+    <CheckBox
+        android:id="@+id/expandable_list_item_Acc"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+         />
+
+    <CheckBox
+        android:id="@+id/expandable_list_item_X"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New CheckBox"
-        />-->
+        android:textSize="14sp"
+        android:layout_toRightOf= "@id/expandable_list_item_Acc"
+        />
 
-</RelativeLayout>
+    <CheckBox
+        android:id="@+id/expandable_list_item_Gyro"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_below = "@id/expandable_list_item_Acc"
+
+    />
+
+    <CheckBox
+        android:id="@+id/expandable_list_item_Y"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_below = "@id/expandable_list_item_X"
+        android:layout_toRightOf= "@id/expandable_list_item_Gyro"
+    />
+
+    <CheckBox
+        android:id="@+id/expandable_list_item_Mag"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_below="@id/expandable_list_item_Gyro"
+            />
+
+
+    <CheckBox
+        android:id="@+id/expandable_list_item_Z"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_below = "@id/expandable_list_item_Y"
+        android:layout_toRightOf= "@id/expandable_list_item_Mag"
+            />
+
+        </RelativeLayout>
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="80dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/gen_plot"/>
+</LinearLayout>

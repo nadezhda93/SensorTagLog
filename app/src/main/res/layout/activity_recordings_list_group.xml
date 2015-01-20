@@ -3,7 +3,8 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    style="?android:listSeparatorTextViewStyle">
 
     <!-- Recording ID-->
     <TextView
@@ -11,8 +12,9 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="5dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop = "5dp"
+        android:layout_marginBottom = "5dp"
         android:textSize="14sp"
         android:textStyle="bold" />
 
@@ -23,15 +25,18 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/expandable_header_recId"
-        android:layout_margin="5dp"
-        android:layout_alignParentLeft="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop = "5dp"
+        android:layout_marginBottom = "5dp"
         android:textSize="18sp" />
 
     <TextView
         android:id="@+id/expandable_subheader_timestamp_end"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop = "5dp"
+        android:layout_marginBottom = "5dp"
         android:layout_below="@id/expandable_subheader_timestamp_start"
         android:textSize="18sp" />
 

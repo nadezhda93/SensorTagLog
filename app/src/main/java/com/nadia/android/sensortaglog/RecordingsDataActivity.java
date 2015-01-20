@@ -1,8 +1,13 @@
 package com.nadia.android.sensortaglog;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -23,11 +28,19 @@ public class RecordingsDataActivity extends Activity {
     private ExpandableListView       mExpRecordingsListView;
     private RecordingsExpListAdapter mExpRecordingsAdapter;
 
-
-    HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
-
+    private HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
     private ArrayList<RecordingsDataModel> mRecordings
             = new ArrayList<RecordingsDataModel>();
+
+    private CheckBox mAcc;
+    private CheckBox mGyro;
+    private CheckBox mMag;
+
+    private CheckBox mX;
+    private CheckBox mY;
+    private CheckBox mZ;
+
+    private Button mPlot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +50,7 @@ public class RecordingsDataActivity extends Activity {
 
         //wire up ExpandableListView widget by resource ID
         mExpRecordingsListView = (ExpandableListView) findViewById(R.id.expandable_list_view);
+        mExpRecordingsListView.setIndicatorBounds(60, 20);
 
         // preparing child data
         prepareListData();
@@ -46,23 +60,21 @@ public class RecordingsDataActivity extends Activity {
         mExpRecordingsListView.setAdapter(mExpRecordingsAdapter);
 
 
-        if(mExpRecordingsAdapter.isEmpty())
-        {
-            Log.d(TAG, "Oops!! ");
-        }
+        //set up listeners for the checkboxes and buttons in the child
+        mExpRecordingsListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View view,
+                                        int groupPosition , int childPosition, long id) {
+            RecordingsDataModel recording = mExpRecordingsAdapter.getGroup(groupPosition);
+            mAcc = (CheckBox)mExpRecordingsAdapter.getChild(groupPosition,childPosition);
+
+            Log.d(TAG, "Clicked " + recording.getId());
+            Log.d(TAG, "pressed " + mAcc);
+                return false;
+            }
+        });
 
 
-
-        //unwrap the array of objects and add to adapter to put on screen
-//        for(int i = 0; i<mRecordings.size(); i++){
-//            RecordingsDataModel rec = mRecordings.get(i);
-//            mExpRecordingsAdapter.add(rec);
-//            mExpRecordingsAdapter.notifyDataSetChanged();
-//            Log.d(TAG, "ID: "     + rec.getId());
-//            Log.d(TAG, "Tstart: " + rec.getStart());
-//            Log.d(TAG, "Tend: "   + rec.getEnd());
-//
-//        }
 //
 //        //set up listener for the list of recordings
 //        mRecordingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -95,13 +107,10 @@ public class RecordingsDataActivity extends Activity {
      * Preparing the list data
      */
     private void prepareListData() {
-
         listDataChild = new HashMap<RecordingsDataModel, ArrayList<String>>();
-        ArrayList<String> sensors = new ArrayList<String>();
+        ArrayList<String> children = new ArrayList<String>();
 
-        sensors.add("Accelerometer");
-        sensors.add("Gyroscope");
-        sensors.add("Magnetometer");
+        children.add("A child");
 
         //check if the database exists
         if (!db.doesDatabaseExist()){
@@ -116,7 +125,7 @@ public class RecordingsDataActivity extends Activity {
 
 
             for (int i = 0; i < mRecordings.size(); i++) {
-                listDataChild.put(mRecordings.get(i), sensors);
+                listDataChild.put(mRecordings.get(i), children);
                 Log.d(TAG, "Success!!");
             }
             Log.d(TAG, "listDataChild empty? " + listDataChild.isEmpty());

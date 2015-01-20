@@ -85,6 +85,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
@@ -96,7 +97,14 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
     private TextView recID;
     private TextView tStart;
     private TextView tEnd;
-    private TextView child;
+
+    private CheckBox childAcc;
+    private CheckBox childGyro;
+    private CheckBox childMag;
+
+    private CheckBox childX;
+    private CheckBox childY;
+    private CheckBox childZ;
 
     // child data in format of header title, child title
     private HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
@@ -153,16 +161,31 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        final String childText = (String) getChild(groupPosition, childPosition);
-        Log.d(TAG, "Got child " + childText);
+        //final String childText = (String) getChild(groupPosition, childPosition);
+        //Log.d(TAG, "Got child " + childText);
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(adapterContext);
             convertView = inflater.inflate(R.layout.activity_recordings_list_item, null);
         }
 
-        child = (TextView) convertView.findViewById(R.id.expandable_list_item);
-        child.setText(childText);
+        childAcc = (CheckBox) convertView.findViewById(R.id.expandable_list_item_Acc);
+        childAcc.setText("Accelerometer");
+
+        childGyro = (CheckBox) convertView.findViewById(R.id.expandable_list_item_Gyro);
+        childGyro.setText("Gyroscope");
+
+        childMag = (CheckBox) convertView.findViewById(R.id.expandable_list_item_Mag);
+        childMag.setText("Magnetometer");
+
+        childX = (CheckBox) convertView.findViewById(R.id.expandable_list_item_X);
+        childX.setText("X axis");
+
+        childY = (CheckBox) convertView.findViewById(R.id.expandable_list_item_Y);
+        childY.setText("Y axis");
+
+        childZ = (CheckBox) convertView.findViewById(R.id.expandable_list_item_Z);
+        childZ.setText("Z axis");
 
         return convertView;
     }
