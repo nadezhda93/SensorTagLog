@@ -10,24 +10,22 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.*;
 
-import org.w3c.dom.Text;
-
+import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
 
 
 /**
  * Created by nadia on 11/01/15.
  * Activity which will query the database for the values of the
  * sensors and plot them on a graph from AndroidPlot API library
+ * http://androidplot.com/docs/
  */
 public class PlotActivity extends Activity {
 
@@ -50,6 +48,7 @@ public class PlotActivity extends Activity {
     private SimpleDateFormat sdf         = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS");
 
     private ArrayList<Long> parsedTimestamps = new ArrayList<Long>();
+    private ArrayList<Float> xValuesAcc;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,27 +63,22 @@ public class PlotActivity extends Activity {
         Log.d(TAG, "ID: " + mRecId + " Start: " + mRecStartTimestamp + " End: " + mRecEndTimestamp);
 
         //x values (Accelerometer timestamps)
-        timestamps = db.queryTimestamps(mRecId);
+        timestamps       = db.queryTimestamps(mRecId);
         parsedTimestamps = parseTimestamps(timestamps);
-
+        xValuesAcc = db.queryXValues(mRecId);
 
         //initialise XYPlot reference:
         plot = (XYPlot)findViewById(R.id.mySimpleXYPlot);
-
-        // Create a couple arrays of y-values to plot:
-        Number[] series1Numbers = {1, 8, 5, 2};
-        //Number[] series2Numbers = {4, 6, 3, 8, 2, 10};
-
 
         // Turn the arrays into XYSeries:
         // SimpleXYSeries takes a List so turn array into a List
         // Y_VALS_ONLY means use the element index as the x value
         // Set the display title of the series as Series1
         XYSeries series1 = new SimpleXYSeries(parsedTimestamps,
-                                               Arrays.asList(series1Numbers),
-                                               "Series1");
+                                              xValuesAcc,
+                                              "X Accelerometer");
         plot.setDomainLabel("Time");
-        plot.setRangeLabel("Range");
+        plot.setRangeLabel("Value");
         plot.setDomainStep(XYStepMode.SUBDIVIDE, parsedTimestamps.size());
 
         // Create a formatter to use for drawing a series using LineAndPointRenderer
@@ -92,16 +86,14 @@ public class PlotActivity extends Activity {
         LineAndPointFormatter series1Format = new LineAndPointFormatter();
         series1Format.setPointLabelFormatter(new PointLabelFormatter());
         series1Format.configure(getApplicationContext(), R.xml.line_point_formatter_with_plf1);
-
+        //remove point labels
+        series1Format.setPointLabelFormatter(null);
+        //reformat timestamps
         plot.setDomainValueFormat(new Format() {
-
-            // create a simple date format that draws on the year portion of our timestamp.
-            // see http://download.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
-            // for a full description of SimpleDateFormat.
-
+            // create a simple date format that changes the way the date looks
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                SimpleDateFormat dateFormat = new SimpleDateFormat(":ss");
 
                 // because our timestamps are in seconds and SimpleDateFormat expects milliseconds
                 // we multiply our timestamp by 1000:
@@ -116,9 +108,7 @@ public class PlotActivity extends Activity {
 
             }
         });
-
-
-        // add a new series to the xyplot:
+        //add a new series to the xyplot:
         plot.addSeries(series1, series1Format);
 
 //        LineAndPointFormatter series2Format = new LineAndPointFormatter();
@@ -127,8 +117,8 @@ public class PlotActivity extends Activity {
 //        plot.addSeries(series2, series2Format);
 
         // reduce the number of range labels
-        plot.setTicksPerRangeLabel(4);
-        plot.getGraphWidget().setDomainLabelOrientation(0);
+        plot.setTicksPerRangeLabel(1);
+        plot.setTicksPerDomainLabel(2);
  }
     //parse timestamp from a String into milliseconds since epoch time for plot
     private ArrayList<Long> parseTimestamps(ArrayList<String> stringTimestamps){

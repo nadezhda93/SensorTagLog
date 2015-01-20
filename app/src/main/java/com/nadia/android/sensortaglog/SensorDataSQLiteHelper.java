@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -171,7 +172,7 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         }
         return recordings;
     }
-
+    //query all timestamps from the selected recording for x axis
     public ArrayList<String> queryTimestamps(int recId){
         SQLiteDatabase db_read = this.getReadableDatabase();
         //create an array to store timestamps
@@ -193,6 +194,31 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         return timestamps;
     }
 
+    //query x y z values for the required sensor
+    public ArrayList<Float> queryXValues(int recId){
+        SQLiteDatabase db_read = this.getReadableDatabase();
+        //create an array to store timestamps
+        ArrayList<Float> xAcc = new ArrayList<Float>();
+        //query string
+        String sql = "SELECT x FROM Accelerometer WHERE recID=" + recId;
+        Cursor cursor = db_read.rawQuery(sql, null);
+        int rows = cursor.getCount(); //get number of rows
+        Log.d(TAG, "Rows in rec: " + rows);
+        cursor.moveToFirst();
+
+        //go through all rows in cursor
+        for (int i = 0; i<rows; i++){
+            float x = cursor.getFloat(0);
+            Log.d(TAG, "xValue " + i + " = " + x);
+            xAcc.add(x);
+            cursor.moveToNext();
+        }
+        return xAcc;
+    }
+
+
+
+    //check if the database file exists
     public boolean doesDatabaseExist() {
         File dbFile = this.context.getDatabasePath(Environment.getExternalStorageDirectory()
                 + File.separator + FILE_DIR
