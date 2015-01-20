@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Layout for individual news entries in a list for device discovery-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_height="fill_parent">
 
+    <!-- Recording ID-->
     <TextView
-        android:id="@+id/expandable_list_header"
+        android:id="@+id/expandable_header_recId"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="17dp" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="5dp"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
-</LinearLayout>
+    <!-- Subtitle contains timestamps of recordings -->
+
+    <TextView
+        android:id="@+id/expandable_subheader_timestamp_start"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expandable_header_recId"
+        android:layout_margin="5dp"
+        android:layout_alignParentLeft="true"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/expandable_subheader_timestamp_end"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:layout_below="@id/expandable_subheader_timestamp_start"
+        android:textSize="18sp" />
+
+</RelativeLayout>

@@ -74,11 +74,13 @@ package com.nadia.android.sensortaglog;
 //EXPANDABLE LIST ADAPTER
 //http://www.androidhive.info/2013/07/android-expandable-list-view-tutorial/
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,39 +89,52 @@ import android.widget.TextView;
 
 public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
 
+    private String TAG = "RecordingsExpListAdapter";
     private Context adapterContext;
-    private List<String> listDataHeader; // header titles
+    private ArrayList<RecordingsDataModel> listDataHeader; // header titles
+
+    private TextView recID;
+    private TextView tStart;
+    private TextView tEnd;
+    private TextView child;
 
     // child data in format of header title, child title
-    private HashMap<String, List<String>> listDataChild;
+    private HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
 
     //constructor
-    public RecordingsExpListAdapter(Context context, List<String> listHeaderData,
-                                    HashMap<String, List<String>> listChildData) {
+    public RecordingsExpListAdapter(Context context, ArrayList<RecordingsDataModel> listHeaderData,
+                                    HashMap<RecordingsDataModel, ArrayList<String>> listChildData) {
         adapterContext = context;
         listDataHeader = listHeaderData;
         listDataChild  = listChildData;
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+    public View getGroupView(int position, boolean isExpanded, View convertView, ViewGroup parent) {
+
+        RecordingsDataModel recording = getGroup(position);
+        Log.d(TAG, "Got recording " + recording.getId());
+
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) adapterContext
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.activity_recordings_list_group, null);
+            LayoutInflater inflater = LayoutInflater.from(adapterContext);
+            convertView = inflater.inflate(R.layout.activity_recordings_list_group, null);
         }
 
-        TextView lblListHeader = (TextView)convertView.findViewById(R.id.expandable_list_header);
-        lblListHeader.setTypeface(null, Typeface.BOLD);
-        lblListHeader.setText(headerTitle);
+        if(recording != null) {
+            recID  = (TextView)convertView.findViewById(R.id.expandable_header_recId);
+            recID.setText("Recording " + String.valueOf(recording.getId()));
 
+            tStart = (TextView)convertView.findViewById(R.id.expandable_subheader_timestamp_start);
+            tStart.setText(recording.getStart());
+
+            tEnd   = (TextView)convertView.findViewById(R.id.expandable_subheader_timestamp_end);
+            tEnd.setText(recording.getEnd());
+        }
         return convertView;
     }
 
     @Override
-    public Object getGroup(int groupPosition) {
+    public RecordingsDataModel getGroup(int groupPosition) {
         return listDataHeader.get(groupPosition);
     }
 
@@ -139,23 +154,22 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
         final String childText = (String) getChild(groupPosition, childPosition);
+        Log.d(TAG, "Got child " + childText);
 
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) adapterContext
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.activity_recordings_list_item, null);
+            LayoutInflater inflater = LayoutInflater.from(adapterContext);
+            convertView = inflater.inflate(R.layout.activity_recordings_list_item, null);
         }
 
-        TextView txtListChild = (TextView) convertView
-                .findViewById(R.id.expandable_list_item);
+        child = (TextView) convertView.findViewById(R.id.expandable_list_item);
+        child.setText(childText);
 
-        txtListChild.setText(childText);
         return convertView;
     }
 
     @Override
-    public Object getChild(int groupPosition, int childPosititon) {
-        return listDataChild.get(listDataHeader.get(groupPosition)).get(childPosititon);
+    public Object getChild(int groupPosition, int childPosition) {
+        return listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition);
     }
 
     @Override

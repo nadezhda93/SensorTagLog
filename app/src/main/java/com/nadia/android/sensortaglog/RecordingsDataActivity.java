@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,14 +20,14 @@ public class RecordingsDataActivity extends Activity {
     private static final String TAG = "RecordingsDataActivity";
     private SensorDataSQLiteHelper db = new SensorDataSQLiteHelper(this);
 
-    private ExpandableListView mExpRecordingsListView;
+    private ExpandableListView       mExpRecordingsListView;
     private RecordingsExpListAdapter mExpRecordingsAdapter;
 
-    List<String> listDataHeader;
-    HashMap<String, List<String>> listDataChild;
 
-//   private ArrayList<RecordingsDataModel> mRecordings
-//            = new ArrayList<RecordingsDataModel>();
+    HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
+
+    private ArrayList<RecordingsDataModel> mRecordings
+            = new ArrayList<RecordingsDataModel>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,31 +37,27 @@ public class RecordingsDataActivity extends Activity {
 
         //wire up ExpandableListView widget by resource ID
         mExpRecordingsListView = (ExpandableListView) findViewById(R.id.expandable_list_view);
-        //set the adapter to the listView in the layout using default android list layout
 
-        // preparing list data
+        // preparing child data
         prepareListData();
 
-        mExpRecordingsAdapter = new RecordingsExpListAdapter(this,
-                listDataHeader, listDataChild);
+        //set the adapter to the listView in the layout using default android list layout
+        mExpRecordingsAdapter = new RecordingsExpListAdapter(this, mRecordings, listDataChild);
         mExpRecordingsListView.setAdapter(mExpRecordingsAdapter);
 
-//        //check if the database exists
-//        if (!db.doesDatabaseExist()){
-//            Toast.makeText(this, "No recordings exist! Please go back.", Toast.LENGTH_LONG).show();
-//            Log.d(TAG, "No recordings in database");
-//        }
-//        //populate RecordingsDataModel by making an object for every recording
-//        //by querying the database and putting the objects on screen
-//        else {
-//            mRecordings = db.queryRecordings();
-//            Log.d(TAG, "queryRecordings started");
-//        }
-//        //unwrap the array of objects and add to adapter to put on screen
+
+        if(mExpRecordingsAdapter.isEmpty())
+        {
+            Log.d(TAG, "Oops!! ");
+        }
+
+
+
+        //unwrap the array of objects and add to adapter to put on screen
 //        for(int i = 0; i<mRecordings.size(); i++){
 //            RecordingsDataModel rec = mRecordings.get(i);
-//            mRecordingsAdapter.add(rec);
-//            mRecordingsAdapter.notifyDataSetChanged();
+//            mExpRecordingsAdapter.add(rec);
+//            mExpRecordingsAdapter.notifyDataSetChanged();
 //            Log.d(TAG, "ID: "     + rec.getId());
 //            Log.d(TAG, "Tstart: " + rec.getStart());
 //            Log.d(TAG, "Tend: "   + rec.getEnd());
@@ -90,8 +87,7 @@ public class RecordingsDataActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //mExpRecordingsAdapter.clear();
-        //mExpRecordings.clear();
+        mRecordings.clear();
     }
 
 
@@ -99,42 +95,32 @@ public class RecordingsDataActivity extends Activity {
      * Preparing the list data
      */
     private void prepareListData() {
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
 
-        // Adding child data
-        listDataHeader.add("Top 250");
-        listDataHeader.add("Now Showing");
-        listDataHeader.add("Coming Soon..");
+        listDataChild = new HashMap<RecordingsDataModel, ArrayList<String>>();
+        ArrayList<String> sensors = new ArrayList<String>();
 
-        // Adding child data
-        List<String> top250 = new ArrayList<String>();
-        top250.add("The Shawshank Redemption");
-        top250.add("The Godfather");
-        top250.add("The Godfather: Part II");
-        top250.add("Pulp Fiction");
-        top250.add("The Good, the Bad and the Ugly");
-        top250.add("The Dark Knight");
-        top250.add("12 Angry Men");
+        sensors.add("Accelerometer");
+        sensors.add("Gyroscope");
+        sensors.add("Magnetometer");
 
-        List<String> nowShowing = new ArrayList<String>();
-        nowShowing.add("The Conjuring");
-        nowShowing.add("Despicable Me 2");
-        nowShowing.add("Turbo");
-        nowShowing.add("Grown Ups 2");
-        nowShowing.add("Red 2");
-        nowShowing.add("The Wolverine");
+        //check if the database exists
+        if (!db.doesDatabaseExist()){
+            Toast.makeText(this, "No recordings exist! Please go back.", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "No recordings in database");
+        }
+        //populate RecordingsDataModel by making an object for every recording
+        //by querying the database and putting the objects on screen
+        else {
+            mRecordings = db.queryRecordings();
+            Log.d(TAG, "Recordings empty? " + mRecordings.isEmpty());
 
-        List<String> comingSoon = new ArrayList<String>();
-        comingSoon.add("2 Guns");
-        comingSoon.add("The Smurfs 2");
-        comingSoon.add("The Spectacular Now");
-        comingSoon.add("The Canyons");
-        comingSoon.add("Europa Report");
 
-        listDataChild.put(listDataHeader.get(0), top250); // Header, Child data
-        listDataChild.put(listDataHeader.get(1), nowShowing);
-        listDataChild.put(listDataHeader.get(2), comingSoon);
+            for (int i = 0; i < mRecordings.size(); i++) {
+                listDataChild.put(mRecordings.get(i), sensors);
+                Log.d(TAG, "Success!!");
+            }
+            Log.d(TAG, "listDataChild empty? " + listDataChild.isEmpty());
+        }
     }
 
 }
