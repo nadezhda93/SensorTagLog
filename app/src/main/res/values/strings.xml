@@ -17,5 +17,5 @@
     <string name="plot_button">View Recordings</string>
     <string name="record_button">Start Recording</string>
     <string name="select_rec_to_plot">Select a recording and data to plot:</string>
-    <string name="gen_plot">Generate Plot</string>
+    <string name="action_plot">Plot</string>
 </resources>

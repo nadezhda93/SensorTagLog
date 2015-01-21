@@ -73,5 +73,5 @@
         android:layout_marginRight="80dp"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="5dp"
-        android:text="@string/gen_plot"/>
+        android:text="@string/action_plot"/>
 </LinearLayout>

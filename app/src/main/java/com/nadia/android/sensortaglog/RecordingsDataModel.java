@@ -13,13 +13,13 @@ public class RecordingsDataModel {
     private String mStart;        //start of recording timestamp
     private String mEnd;          //end of recording timestamp
 
-    private Boolean mAcc;         //bool values for checkboxes
-    private Boolean mGyro;
-    private Boolean mMag;
+    private Boolean mAcc  = false;         //bool values for checkboxes
+    private Boolean mGyro = false;         //init to false
+    private Boolean mMag  = false;
 
-    private Boolean mX;
-    private Boolean mY;
-    private Boolean mZ;
+    private Boolean mX = false;
+    private Boolean mY = false;
+    private Boolean mZ = false;
 
     //constructor
     public RecordingsDataModel(int recId, String start, String end){
