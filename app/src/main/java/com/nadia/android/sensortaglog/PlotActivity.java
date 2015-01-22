@@ -32,15 +32,9 @@ public class PlotActivity extends Activity {
     private final String TAG = "PlotActivity";
 
     public static final String EXTRAS_REC_ID          = "ExtrasRecId";
-    public static final String EXTRAS_START_TIMESTAMP = "ExtrasStartTimestamp";
-    public static final String EXTRAS_END_TIMESTAMP   = "ExtrasEndTimestamp";
 
     private Intent intent = new Intent();
-
     private int    mRecId;
-    private String mRecStartTimestamp;
-    private String mRecEndTimestamp;
-
     private XYPlot plot;
 
     private SensorDataSQLiteHelper db    = new SensorDataSQLiteHelper(this);
@@ -50,6 +44,8 @@ public class PlotActivity extends Activity {
     private ArrayList<Long> parsedTimestamps = new ArrayList<Long>();
     private ArrayList<Float> xValuesAcc;
 
+    private RecordingsDataModel recording;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,14 +54,20 @@ public class PlotActivity extends Activity {
         // extract intent information from RecordingsDataActivity
         intent = getIntent();
         mRecId = intent.getIntExtra(EXTRAS_REC_ID, 0);
-        mRecStartTimestamp = intent.getStringExtra(EXTRAS_START_TIMESTAMP);
-        mRecEndTimestamp = intent.getStringExtra(EXTRAS_END_TIMESTAMP);
-        Log.d(TAG, "ID: " + mRecId + " Start: " + mRecStartTimestamp + " End: " + mRecEndTimestamp);
+        Log.d(TAG, "ID selected: " + mRecId);
+
+        //get the object that corresponds to mRecId from mRecordings array in RecDataActivity
+        for (int i = 0;i<RecordingsDataActivity.mRecordings.size();i++){
+            if(RecordingsDataActivity.mRecordings.get(i).getId() == mRecId){
+                recording = RecordingsDataActivity.mRecordings.get(i);
+            }
+        }
+        Log.d(TAG, "Recording ID: "+ recording.getId());
 
         //x values (Accelerometer timestamps)
         timestamps       = db.queryTimestamps(mRecId);
         parsedTimestamps = parseTimestamps(timestamps);
-        xValuesAcc = db.queryXValues(mRecId);
+        xValuesAcc = db.queryValues(mRecId, "Accelerometer", "x");
 
         //initialise XYPlot reference:
         plot = (XYPlot)findViewById(R.id.mySimpleXYPlot);

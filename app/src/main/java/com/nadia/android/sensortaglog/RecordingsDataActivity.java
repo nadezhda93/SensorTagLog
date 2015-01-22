@@ -13,6 +13,8 @@ import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import com.androidplot.Plot;
+
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,14 +34,16 @@ public class RecordingsDataActivity extends Activity {
     private RecordingsExpListAdapter mExpRecordingsAdapter;
 
     private HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
-    private ArrayList<RecordingsDataModel> mRecordings
+    public static ArrayList<RecordingsDataModel> mRecordings
             = new ArrayList<RecordingsDataModel>();
 
     private ArrayList<String> children = new ArrayList<String>();
 
     private CheckBox checkBox;
     private int lastExpandedPosition = -1;
+    private int finalRecSelection;
     public static Boolean selectionMade = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +90,6 @@ public class RecordingsDataActivity extends Activity {
                 Log.d(TAG, "Group expanded: " + rec.getId());
                 if(lastExpandedPosition != -1 && groupPosition != lastExpandedPosition) {
                     mExpRecordingsListView.collapseGroup(lastExpandedPosition);
-
                     //clear any selections for lastExpandedPosition
                     RecordingsDataModel lastRec =
                             mExpRecordingsAdapter.getGroup(lastExpandedPosition);
@@ -96,6 +99,8 @@ public class RecordingsDataActivity extends Activity {
                     selectionMade = false;
                 }
                 lastExpandedPosition = groupPosition;
+                finalRecSelection = groupPosition;
+
             }
         });
     }
@@ -124,7 +129,12 @@ public class RecordingsDataActivity extends Activity {
                 }
                 else {
                     //start Plot Activity
+                    RecordingsDataModel rec = mExpRecordingsAdapter.getGroup(finalRecSelection);
                     Log.d(TAG, "Start PlotActivity!!");
+                    final Intent intent = new Intent(RecordingsDataActivity.this,
+                            PlotActivity.class);
+                    intent.putExtra(PlotActivity.EXTRAS_REC_ID, rec.getId());
+                    startActivity(intent);
                 }
                 return true;
 

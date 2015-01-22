@@ -24,9 +24,9 @@ public class RecordingsDataModel {
 
     //constructor
     public RecordingsDataModel(int recId, String start, String end){
-        mId = recId;
+        mId    = recId;
         mStart = start;
-        mEnd = end;
+        mEnd   = end;
 
     }
 
