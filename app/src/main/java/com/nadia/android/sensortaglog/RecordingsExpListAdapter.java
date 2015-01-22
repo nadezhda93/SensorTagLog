@@ -91,7 +91,7 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
         final String childText = (String) getChild(groupPosition, childPosition);
-        //Log.d(TAG, "Got child " + childText);
+        final RecordingsDataModel recording = getGroup(groupPosition);
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(adapterContext);
@@ -101,7 +101,14 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
         childBox = (CheckBox) convertView.findViewById(R.id.expandable_list_item);
         childBox.setText(childText);
 
-        //set up listener for the checkbox
+        //check whether all attributes are disabled as set all checkboxes unchecked
+        if(!recording.getAcc() && !recording.getGyro() && !recording.getMag() &&
+                !recording.getX() && !recording.getY() && !recording.getZ()){
+            childBox.setChecked(false);
+        }
+
+        //set up listener for the checkbox and change member in RecordingsDataModel for the
+        //recording object
         childBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
@@ -110,55 +117,14 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
                 String child = (String)getChild(groupPosition, childPosition);
 
                 if(isChecked) {
-                    //check what the child is, set member in Model class
-                    if(child.equals("Accelerometer")){
-                        rec.setAcc(true);
-                    }
-                    else if(child.equals("Gyroscope")){
-                        rec.setGyro(true);
-                    }
-                    else if(child.equals("Magnetometer")){
-                        rec.setMag(true);
-                    }
-                    else if(child.equals("X axis")){
-                        rec.setX(true);
-                    }
-                    else if(child.equals("Y axis")){
-                        rec.setY(true);
-                    }
-                    else if(child.equals("Z axis")){
-                        rec.setZ(true);
-                    }
-                    Log.d(TAG, "Selected ACC " + rec.getAcc() + " GYRO " + rec.getGyro() + " MAG " + rec.getMag());
-                    Log.d(TAG, "Selected X " + rec.getX() + " Y " + rec.getY() + " Z " + rec.getZ());
+                    rec.makeSelection(rec, child);
                 }
                 else{
-                    //check what the child is, set member in Model class
-                    if(child.equals("Accelerometer")){
-                        rec.setAcc(false);
-                    }
-                    else if(child.equals("Gyroscope")){
-                        rec.setGyro(false);
-                    }
-                    else if(child.equals("Magnetometer")){
-                        rec.setMag(false);
-                    }
-                    else if(child.equals("X axis")){
-                        rec.setX(false);
-                    }
-                    else if(child.equals("Y axis")){
-                        rec.setY(false);
-                    }
-                    else if(child.equals("Z axis")){
-                        rec.setZ(false);
-                    }
-                    Log.d(TAG, "Selected ACC " + rec.getAcc() + " GYRO " + rec.getGyro() + " MAG " + rec.getMag());
-                    Log.d(TAG, "Selected X " + rec.getX() + " Y " + rec.getY() + " Z " + rec.getZ());
+                    rec.clearSelection(rec,child);
                 }
             }
         }
         );
-
         return convertView;
         }
 

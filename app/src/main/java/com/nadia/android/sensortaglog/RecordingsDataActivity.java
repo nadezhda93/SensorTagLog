@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,10 @@ public class RecordingsDataActivity extends Activity {
     private ArrayList<RecordingsDataModel> mRecordings
             = new ArrayList<RecordingsDataModel>();
 
+    private ArrayList<String> children = new ArrayList<String>();
+
     private CheckBox checkBox;
+    private int lastExpandedPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,45 @@ public class RecordingsDataActivity extends Activity {
         mExpRecordingsAdapter = new RecordingsExpListAdapter(this, mRecordings, listDataChild);
         mExpRecordingsListView.setAdapter(mExpRecordingsAdapter);
 
+        checkBox = (CheckBox)findViewById(R.id.expandable_list_item);
+
+        //listener for group click to override default actions
+        mExpRecordingsListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                //prevent default scrolling when groups open and close
+                if(parent.isGroupExpanded(groupPosition)){
+                    parent.collapseGroup(groupPosition);
+                }
+                else{
+                    boolean animateExpansion = false;
+                    parent.expandGroup(groupPosition,animateExpansion);
+                }
+                //telling the listView we have handled the group click, and don't want the default actions.
+                return true;
+            }
+        });
+
+
+        //listener for group expand
+        mExpRecordingsListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                RecordingsDataModel rec = mExpRecordingsAdapter.getGroup(groupPosition);
+                Log.d(TAG, "Group expanded: " + rec.getId());
+                if(lastExpandedPosition != -1 && groupPosition != lastExpandedPosition) {
+                    mExpRecordingsListView.collapseGroup(lastExpandedPosition);
+
+                    //clear any selections for lastExpandedPosition
+                    RecordingsDataModel lastRec =
+                            mExpRecordingsAdapter.getGroup(lastExpandedPosition);
+                    for (int i = 0; i < children.size(); i++){
+                        lastRec.clearSelection(lastRec,children.get(i));
+                    }
+                }
+                lastExpandedPosition = groupPosition;
+            }
+        });
     }
 
     @Override
@@ -86,7 +129,6 @@ public class RecordingsDataActivity extends Activity {
     //set up child data
     private void prepareListData() {
         listDataChild = new HashMap<RecordingsDataModel, ArrayList<String>>();
-        ArrayList<String> children = new ArrayList<String>();
         //strings for children check boxes
         children.add("Accelerometer");
         children.add("Gyroscope");
@@ -114,5 +156,7 @@ public class RecordingsDataActivity extends Activity {
             Log.d(TAG, "listDataChild empty? " + listDataChild.isEmpty());
         }
     }
+
+
 
 }

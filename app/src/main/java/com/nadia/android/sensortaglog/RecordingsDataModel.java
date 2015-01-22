@@ -1,13 +1,14 @@
 package com.nadia.android.sensortaglog;
 
-
-import java.util.UUID;
+import android.util.Log;
 
 /**
  * Created by nadia on 08/12/14.
  * Class to store when a recording is completed by start and end timestamp and query the database
+ * and also what attributes has the user chosen to plot
  */
 public class RecordingsDataModel {
+    private String TAG = "RecordingsDataModel";
 
     private int    mId;           //unique ID for each recording
     private String mStart;        //start of recording timestamp
@@ -73,4 +74,59 @@ public class RecordingsDataModel {
     public void setZ(Boolean z){mZ = z;}
 
     public Boolean getZ(){return mZ;}
+
+    //other member function
+
+    //set and reset chosen atributes from checkboxes in RecordingsExpListAdapter
+    public void makeSelection(RecordingsDataModel rec, String child){
+        //check what the child is, set member in Model class
+        if(child.equals("Accelerometer")){
+            rec.setAcc(true);
+        }
+        else if(child.equals("Gyroscope")){
+            rec.setGyro(true);
+        }
+        else if(child.equals("Magnetometer")){
+            rec.setMag(true);
+        }
+        else if(child.equals("X axis")){
+            rec.setX(true);
+        }
+        else if(child.equals("Y axis")){
+            rec.setY(true);
+        }
+        else if(child.equals("Z axis")){
+            rec.setZ(true);
+        }
+        Log.d(TAG, "Selected ACC " + rec.getAcc() + " GYRO "
+                + rec.getGyro() + " MAG " + rec.getMag());
+        Log.d(TAG, "Selected X " + rec.getX() + " Y " + rec.getY()
+                + " Z " + rec.getZ());
+    }
+
+    public void clearSelection(RecordingsDataModel rec, String child){
+        //check what the child is, set member in Model class
+        if(child.equals("Accelerometer")){
+            rec.setAcc(false);
+        }
+        else if(child.equals("Gyroscope")){
+            rec.setGyro(false);
+        }
+        else if(child.equals("Magnetometer")){
+            rec.setMag(false);
+        }
+        else if(child.equals("X axis")){
+            rec.setX(false);
+        }
+        else if(child.equals("Y axis")){
+            rec.setY(false);
+        }
+        else if(child.equals("Z axis")){
+            rec.setZ(false);
+        }
+        Log.d(TAG, "Selected ACC " + rec.getAcc() + " GYRO "
+                + rec.getGyro() + " MAG " + rec.getMag());
+        Log.d(TAG, "Selected X " + rec.getX() + " Y " + rec.getY()
+                + " Z " + rec.getZ());
+    }
 }
