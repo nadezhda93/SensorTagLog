@@ -105,6 +105,7 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
         if(!recording.getAcc() && !recording.getGyro() && !recording.getMag() &&
                 !recording.getX() && !recording.getY() && !recording.getZ()){
             childBox.setChecked(false);
+            RecordingsDataActivity.selectionMade = false;
         }
 
         //set up listener for the checkbox and change member in RecordingsDataModel for the
@@ -118,9 +119,15 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
 
                 if(isChecked) {
                     rec.makeSelection(rec, child);
+                    RecordingsDataActivity.selectionMade = true;
                 }
                 else{
                     rec.clearSelection(rec,child);
+                    //check if anything is chosen, reset boolean for Plot button
+                    if(!rec.getAcc() && !rec.getGyro() && !rec.getMag() &&
+                            !rec.getX() && !rec.getY() && !rec.getZ()){
+                        RecordingsDataActivity.selectionMade = false;
+                    }
                 }
             }
         }

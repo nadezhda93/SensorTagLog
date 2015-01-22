@@ -39,6 +39,7 @@ public class RecordingsDataActivity extends Activity {
 
     private CheckBox checkBox;
     private int lastExpandedPosition = -1;
+    public static Boolean selectionMade = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,7 @@ public class RecordingsDataActivity extends Activity {
                     for (int i = 0; i < children.size(); i++){
                         lastRec.clearSelection(lastRec,children.get(i));
                     }
+                    selectionMade = false;
                 }
                 lastExpandedPosition = groupPosition;
             }
@@ -116,8 +118,14 @@ public class RecordingsDataActivity extends Activity {
         switch(item.getItemId()){
             case R.id.action_plot:
                 //do something when plot is pressed
-                //start Plot Activity
-
+                if(!selectionMade){
+                    Toast.makeText(RecordingsDataActivity.this, "You must select attributes to plot.",
+                            Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //start Plot Activity
+                    Log.d(TAG, "Start PlotActivity!!");
+                }
                 return true;
 
             default:
