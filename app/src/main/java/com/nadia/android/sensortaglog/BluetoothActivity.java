@@ -191,6 +191,11 @@ public class BluetoothActivity extends Activity {
                scanLeDevice(true);
                return true;
 
+           case R.id.action_data:
+               final Intent intent = new Intent(BluetoothActivity.this,
+                       RecordingsDataActivity.class);
+               startActivity(intent);
+
            case R.id.action_settings:
                 //do something when you press overflow and settings
                return true;
