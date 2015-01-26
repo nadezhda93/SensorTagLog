@@ -22,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
 
@@ -34,6 +35,10 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
     private TextView tEnd;
 
     private CheckBox childBox;
+
+    private ArrayList<String> sensors = new ArrayList<String>();
+    private ArrayList<String> axes = new ArrayList<String>();
+
 
     // child data in format of header title, child title
     private HashMap<RecordingsDataModel, ArrayList<String>> listDataChild;
@@ -88,10 +93,11 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(final int groupPosition, final int childPosition,
-                             boolean isLastChild, View convertView, ViewGroup parent) {
-
+                             boolean isLastChild, View convertView, final ViewGroup parent) {
+        Log.d(TAG, "got child view");
         final String childText = (String) getChild(groupPosition, childPosition);
         final RecordingsDataModel recording = getGroup(groupPosition);
+        setSensors();
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(adapterContext);
@@ -105,28 +111,45 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
         if(!recording.getAcc() && !recording.getGyro() && !recording.getMag() &&
                 !recording.getX() && !recording.getY() && !recording.getZ()){
             childBox.setChecked(false);
-            RecordingsDataActivity.selectionMade = false;
+            RecordingsDataActivity.selectionAxisMade = false;
+            RecordingsDataActivity.selectionSensorMade = false;
         }
 
         //set up listener for the checkbox and change member in RecordingsDataModel for the
         //recording object
         childBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
-                //get the recording and child for which box was checked
-                RecordingsDataModel rec = getGroup(groupPosition);
-                String child = (String)getChild(groupPosition, childPosition);
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                String child = (String) getChild(groupPosition, childPosition);
+                Log.d(TAG, "Child check change here: " + child);
 
-                if(isChecked) {
-                    rec.makeSelection(rec, child);
-                    RecordingsDataActivity.selectionMade = true;
+                if (isChecked) {
+                    //did we select a sensor again?
+                    if (sensors.contains(child) && RecordingsDataActivity.selectionSensorMade) {
+                        Log.d(TAG, "selected sensor again");
+                        Toast.makeText(parent.getContext(), "Select only one sensor. " +
+                                "First selection only will be counted.", Toast.LENGTH_LONG).show();
+                    }
+                    //did we select axis?
+                    else if (axes.contains(child)) {
+                        Log.d(TAG, "selected axis");
+                        recording.makeSelection(recording, child);
+                        RecordingsDataActivity.selectionAxisMade = true;
+                    }
+                    //we selected sensor for the first time
+                    else {
+                        Log.d(TAG, "selected sensor first time");
+                        recording.makeSelection(recording, child);
+                        RecordingsDataActivity.selectionSensorMade = true;
+                    }
                 }
-                else{
-                    rec.clearSelection(rec,child);
+                else {
+                    recording.clearSelection(recording, child);
                     //check if anything is chosen, reset boolean for Plot button
-                    if(!rec.getAcc() && !rec.getGyro() && !rec.getMag() &&
-                            !rec.getX() && !rec.getY() && !rec.getZ()){
-                        RecordingsDataActivity.selectionMade = false;
+                    if (!recording.getAcc() && !recording.getGyro() && !recording.getMag()) {
+                        RecordingsDataActivity.selectionSensorMade = false;
+                    } else if (!recording.getX() && !recording.getY() && !recording.getZ()) {
+                        RecordingsDataActivity.selectionAxisMade   = false;
                     }
                 }
             }
@@ -160,6 +183,17 @@ public class RecordingsExpListAdapter extends BaseExpandableListAdapter {
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
+
+    public void setSensors(){
+        sensors.add("Accelerometer");
+        sensors.add("Gyroscope");
+        sensors.add("Magnetometer");
+
+        axes.add("X axis");
+        axes.add("Y axis");
+        axes.add("Z axis");
+    }
 }
+
 
 

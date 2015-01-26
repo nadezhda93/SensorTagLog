@@ -41,9 +41,8 @@ public class RecordingsDataActivity extends Activity {
 
     private CheckBox checkBox;
     private int lastExpandedPosition = -1;
-    private int finalRecSelection;
-    public static Boolean selectionMade = false;
-
+    public static Boolean selectionAxisMade   = false;
+    public static Boolean selectionSensorMade = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,7 @@ public class RecordingsDataActivity extends Activity {
 
         checkBox = (CheckBox)findViewById(R.id.expandable_list_item);
 
-        //listener for group click to override default actions
+        //listener for group click to override default actions, stop auto-scrolling
         mExpRecordingsListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
@@ -82,7 +81,7 @@ public class RecordingsDataActivity extends Activity {
         });
 
 
-        //listener for group expand
+        //listener for group expand, close previous group when new is open
         mExpRecordingsListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
@@ -96,11 +95,10 @@ public class RecordingsDataActivity extends Activity {
                     for (int i = 0; i < children.size(); i++){
                         lastRec.clearSelection(lastRec,children.get(i));
                     }
-                    selectionMade = false;
+                    selectionAxisMade = false;
+                    selectionSensorMade = false;
                 }
                 lastExpandedPosition = groupPosition;
-                finalRecSelection = groupPosition;
-
             }
         });
     }
@@ -122,21 +120,21 @@ public class RecordingsDataActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case R.id.action_plot:
-                //do something when plot is pressed
-                if(!selectionMade){
-                    Toast.makeText(RecordingsDataActivity.this, "You must select attributes to plot.",
-                            Toast.LENGTH_SHORT).show();
-                }
-                else {
+               //start new activity when both selections have been made
+               if (selectionSensorMade && selectionAxisMade){
                     //start Plot Activity
-                    RecordingsDataModel rec = mExpRecordingsAdapter.getGroup(finalRecSelection);
+                    RecordingsDataModel rec = mExpRecordingsAdapter.getGroup(lastExpandedPosition);
                     Log.d(TAG, "Start PlotActivity!!");
                     final Intent intent = new Intent(RecordingsDataActivity.this,
-                            PlotActivity.class);
+                                                    PlotActivity.class);
                     intent.putExtra(PlotActivity.EXTRAS_REC_ID, rec.getId());
                     startActivity(intent);
                 }
-                return true;
+               else{
+                    Toast.makeText(RecordingsDataActivity.this, "You must select attributes to plot.",
+                                        Toast.LENGTH_SHORT).show();
+               }
+               return true;
 
             default:
                 return super.onOptionsItemSelected(item);
