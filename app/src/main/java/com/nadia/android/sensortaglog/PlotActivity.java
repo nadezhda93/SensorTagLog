@@ -49,21 +49,15 @@ public class PlotActivity extends Activity {
 
     private ArrayList<Long> parsedTimestamps = new ArrayList<Long>();
 
-    private ArrayList<Float> xValuesAcc = new ArrayList<Float>();
-    private ArrayList<Float> yValuesAcc = new ArrayList<Float>();
-    private ArrayList<Float> zValuesAcc = new ArrayList<Float>();
-
-    private ArrayList<Float> xValuesGyro = new ArrayList<Float>();
-    private ArrayList<Float> yValuesGyro = new ArrayList<Float>();
-    private ArrayList<Float> zValuesGyro = new ArrayList<Float>();
-
-    private ArrayList<Float> xValuesMag = new ArrayList<Float>();
-    private ArrayList<Float> yValuesMag = new ArrayList<Float>();
-    private ArrayList<Float> zValuesMag = new ArrayList<Float>();
+    private ArrayList<Float> xValues = new ArrayList<Float>();
+    private ArrayList<Float> yValues = new ArrayList<Float>();
+    private ArrayList<Float> zValues = new ArrayList<Float>();
 
     private int enabledAxes = 0;
     private ArrayList<XYSeries> xySeries = new ArrayList<XYSeries>();
     private ArrayList<LineAndPointFormatter> seriesFormat = new ArrayList<LineAndPointFormatter>();
+
+    private String table;
 
     //random colours for series
     private Random rnd = new Random();
@@ -89,18 +83,15 @@ public class PlotActivity extends Activity {
         }
         Log.d(TAG, "Recording ID: "+ recording.getId());
 
-
-        //x values (Accelerometer timestamps) for all sensors
-        timestamps       = db.queryTimestamps(mRecId);
-        parsedTimestamps = parseTimestamps(timestamps);
-
         //y values - dependent on selection
         getData();
+        //parse timestamps
+        parsedTimestamps = parseTimestamps(timestamps);
 
         //initialise XYPlot reference:
         plot = (XYPlot)findViewById(R.id.mySimpleXYPlot);
         plot.setDomainLabel("Time (s)");
-        plot.setRangeLabel("Value");
+        plot.setRangeLabel(table);
         plot.setDomainStep(XYStepMode.SUBDIVIDE, parsedTimestamps.size());
         //reformat timestamps
         plot.setDomainValueFormat(new Format() {
@@ -125,7 +116,6 @@ public class PlotActivity extends Activity {
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(1);
         plot.setTicksPerDomainLabel(2);
-
 
         //repeat the same to set up the plot
         Log.d(TAG, "Axes end: " + enabledAxes);
@@ -155,68 +145,80 @@ public class PlotActivity extends Activity {
         }
         return parsedTimestamps;
     }
+
     private void getData(){
         //Accelerometer
         if(recording.getAcc()){
+            table = "Accelerometer";
+            //x values (timestamps) for required sensor
+            timestamps = db.queryTimestamps(mRecId, table);
+
             //get values for x y z as needed
             if(recording.getX()){
-                Log.d(TAG, "Got X");
-                xValuesAcc = db.queryValues(mRecId, "Accelerometer", "x");
+                xValues = db.queryValues(mRecId, table, "x");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesX: " + enabledAxes);
             }
             if(recording.getY()){
-                Log.d(TAG, "Got Y");
-                yValuesAcc = db.queryValues(mRecId, "Accelerometer", "y");
+                yValues = db.queryValues(mRecId,table, "y");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesY: " + enabledAxes);
             }
             if(recording.getZ()){
                 Log.d(TAG, "Got Z");
-                zValuesAcc = db.queryValues(mRecId, "Accelerometer", "z");
+                zValues = db.queryValues(mRecId, table, "z");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesZ: " + enabledAxes);
             }
         }
         //Gyroscope
         if(recording.getGyro()){
+            table = "Gyroscope";
+            //x values (timestamps) for required sensor
+            timestamps = db.queryTimestamps(mRecId, table);
+
             if(recording.getX()){
-                xValuesGyro = db.queryValues(mRecId, "Gyroscope", "x");
-                Log.d(TAG, "Size Gyro x = " + xValuesGyro.size());
+                xValues = db.queryValues(mRecId, table, "x");
+                Log.d(TAG, "Size Gyro x = " + xValues.size());
                 enabledAxes += 1;
                 Log.d(TAG, "AxesX: " + enabledAxes);
             }
             if(recording.getY()){
-                yValuesGyro = db.queryValues(mRecId, "Gyroscope", "y");
+                yValues = db.queryValues(mRecId, table, "y");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesY: " + enabledAxes);
             }
             if(recording.getZ()){
-                zValuesGyro = db.queryValues(mRecId, "Gyroscope", "z");
+                zValues = db.queryValues(mRecId, table, "z");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesZ: " + enabledAxes);
             }
         }
         //Magnetometer
         if(recording.getMag()){
+            table = "Magnetometer";
+            //x values (timestamps) for required sensor
+            timestamps = db.queryTimestamps(mRecId, table);
+
             if(recording.getX()){
-                xValuesMag = db.queryValues(mRecId, "Magnetometer", "x");
+                xValues = db.queryValues(mRecId, table, "x");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesX: " + enabledAxes);
             }
             if(recording.getY()){
-                yValuesMag = db.queryValues(mRecId, "Magnetometer", "y");
+                yValues = db.queryValues(mRecId, table, "y");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesY: " + enabledAxes);
             }
             if(recording.getZ()){
-                zValuesMag = db.queryValues(mRecId, "Magnetometer", "z");
+                zValues = db.queryValues(mRecId, table, "z");
                 enabledAxes += 1;
                 Log.d(TAG, "AxesZ: " + enabledAxes);
             }
 
         }
     }
+
     private void setXYSeries(){
         // Turn the arrays into XYSeries:
         // SimpleXYSeries takes a List so turn array into a List
@@ -224,48 +226,49 @@ public class PlotActivity extends Activity {
         // Set the display title of the series
         if(recording.getAcc()) {
             if(recording.getX()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValuesAcc, "X Acc"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValues, "X Acc"));
                 Log.d(TAG, "X added to series");
             }
             if(recording.getY()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValuesAcc, "Y Acc"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValues, "Y Acc"));
                 Log.d(TAG, "Y added to series");
             }
             if(recording.getZ()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValuesAcc, "Z Acc"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValues, "Z Acc"));
                 Log.d(TAG, "Y added to series");
             }
         }
         if(recording.getGyro()){
             if(recording.getX()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValuesGyro, "X Gyro"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValues, "X Gyro"));
                 Log.d(TAG, "X added to series");
             }
             if(recording.getY()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValuesGyro, "Y Gyro"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValues, "Y Gyro"));
                 Log.d(TAG, "Y added to series");
             }
             if(recording.getZ()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValuesGyro, "Z Gyro"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValues, "Z Gyro"));
                 Log.d(TAG, "Z added to series");
             }
         }
         if(recording.getMag()){
             if(recording.getX()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValuesMag, "X Mag"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, xValues, "X Mag"));
                 Log.d(TAG, "X added to series");
             }
             if(recording.getY()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValuesMag, "Y Mag"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, yValues, "Y Mag"));
                 Log.d(TAG, "Y added to series");
             }
             if(recording.getZ()) {
-                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValuesMag, "Z Mag"));
+                xySeries.add(new SimpleXYSeries(parsedTimestamps, zValues, "Z Mag"));
                 Log.d(TAG, "Z added to series");
             }
         }
 
     }
+
     private void setFormatters(){
         //generate format for each series with a random line colour
         seriesFormat.add(new LineAndPointFormatter(
@@ -275,6 +278,5 @@ public class PlotActivity extends Activity {
                 new PointLabelFormatter(Color.WHITE)));
 
     }
-
 
 }

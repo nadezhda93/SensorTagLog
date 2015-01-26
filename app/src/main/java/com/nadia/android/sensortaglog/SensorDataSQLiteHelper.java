@@ -173,12 +173,12 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
         return recordings;
     }
     //query all timestamps from the selected recording for x axis
-    public ArrayList<String> queryTimestamps(int recId){
+    public ArrayList<String> queryTimestamps(int recId, String table){
         SQLiteDatabase db_read = this.getReadableDatabase();
         //create an array to store timestamps
         ArrayList<String> timestamps = new ArrayList<String>();
         //query string
-        String sql = "SELECT time FROM Accelerometer WHERE recID=" + recId;
+        String sql = "SELECT time FROM " + table + " WHERE recID=" + recId;
         Cursor cursor = db_read.rawQuery(sql, null);
         int rows = cursor.getCount(); //get number of rows
         Log.d(TAG, "Rows in rec: " + rows);
