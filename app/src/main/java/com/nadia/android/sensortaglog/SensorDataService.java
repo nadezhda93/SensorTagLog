@@ -112,7 +112,7 @@ public class SensorDataService extends Service {
                         changePeriod(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
                                 SensorDataModel.MAGNETOMETER_PERIOD);
                     }
-                }, 1000);
+                }, 700);
 
                 //ENABLE SENSORS
                 enableHandler.postDelayed(new Runnable() {
@@ -123,7 +123,7 @@ public class SensorDataService extends Service {
                                 (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_CONFIG"), true);
                         Log.d(TAG, "Accelerometer sensor enabled");
                     }
-                }, 1500);
+                }, 900);
 
                 //enable Gyroscope sensor
                 enableHandler.postDelayed(new Runnable() {
@@ -133,7 +133,7 @@ public class SensorDataService extends Service {
                                 (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_CONFIG"), true);
 
                     }
-                }, 2000);
+                }, 1100);
 
                 //enable Magnetometer sensor after 1 sec
                 enableHandler.postDelayed(new Runnable() {
@@ -143,7 +143,7 @@ public class SensorDataService extends Service {
                                 (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
                         Log.d(TAG, "Magnetometer sensor enabled");
                     }
-                }, 2500);
+                }, 1300);
 
                 //enable notifications for Accelerometer sensor
                 enableHandler.postDelayed(new Runnable(){
@@ -153,7 +153,7 @@ public class SensorDataService extends Service {
                                 (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
                         Log.d(TAG, "Acc notifications enabled");
                     }
-                }, 3050);
+                }, 1550);
 
                 //enable notifications for Gyroscope sensor
                 enableHandler.postDelayed(new Runnable() {
@@ -163,7 +163,7 @@ public class SensorDataService extends Service {
                                 (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
                         Log.d(TAG, "Gyro notifications enabled");
                     }
-                }, 3200);
+                }, 1700);
 
                 //enable notifications for Magnetometer sensor
                 enableHandler.postDelayed(new Runnable() {
@@ -173,7 +173,7 @@ public class SensorDataService extends Service {
                                 (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
                         Log.d(TAG, "Mag notifications enabled");
                     }
-                }, 3300);
+                }, 1900);
             }
             else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
