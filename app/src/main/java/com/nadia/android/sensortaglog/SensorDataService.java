@@ -144,6 +144,36 @@ public class SensorDataService extends Service {
                         Log.d(TAG, "Magnetometer sensor enabled");
                     }
                 }, 2500);
+
+                //enable notifications for Accelerometer sensor
+                enableHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+                        setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
+                        Log.d(TAG, "Acc notifications enabled");
+                    }
+                }, 3000);
+
+                //enable notifications for Gyroscope sensor
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
+                        Log.d(TAG, "Gyro notifications enabled");
+                    }
+                }, 3500);
+
+                //enable notifications for Magnetometer sensor
+                enableHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
+                        Log.d(TAG, "Mag notifications enabled");
+                    }
+                }, 4000);
             }
             else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -155,30 +185,30 @@ public class SensorDataService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "Write operation successful");
 
-                //enable notifications for Accelerometer sensor
-                setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
-                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
-                Log.d(TAG, "Acc notifications enabled");
-
-                //enable notifications for Gyroscope sensor
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
-                                (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
-                        Log.d(TAG, "Gyro notifications enabled");
-                    }
-                }, 1000);
-
-                //enable notifications for Magnetometer sensor
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
-                        Log.d(TAG, "Mag notifications enabled");
-                    }
-                }, 1500);
+//                //enable notifications for Accelerometer sensor
+//                setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
+//                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
+//                Log.d(TAG, "Acc notifications enabled");
+//
+//                //enable notifications for Gyroscope sensor
+//                enableHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+//                                (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
+//                        Log.d(TAG, "Gyro notifications enabled");
+//                    }
+//                }, 1000);
+//
+//                //enable notifications for Magnetometer sensor
+//                enableHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+//                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
+//                        Log.d(TAG, "Mag notifications enabled");
+//                    }
+//                }, 1000);
             }
             else {
                 Log.d(TAG, "Write operation returned status: " + status);
@@ -253,11 +283,11 @@ public class SensorDataService extends Service {
         }
         bluetoothGatt.writeCharacteristic(config);  //write to characteristic
     }
-    //Changing period by writing to period UUID of each sensor to 1 Hz
+    //Changing period by writing to period UUID of each sensor to 5 Hz
     private void changePeriod(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID periodUuid){
         BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
         BluetoothGattCharacteristic sensorPeriod = sensorService.getCharacteristic(periodUuid);
-        sensorPeriod.setValue(new byte[]{100}); //set Period to 100 * 10 ms = 1 s
+        sensorPeriod.setValue(new byte[]{20}); //set Period to 20 * 10 ms = 200 ms = 1/5th
         bluetoothGatt.writeCharacteristic(sensorPeriod);
         Log.d(TAG, "Period value after write " +
                 sensorPeriod.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8,0));
