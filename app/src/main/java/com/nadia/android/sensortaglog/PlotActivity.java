@@ -90,7 +90,7 @@ public class PlotActivity extends Activity {
 
         //initialise XYPlot reference:
         plot = (XYPlot)findViewById(R.id.mySimpleXYPlot);
-        plot.setDomainLabel("Time (s)");
+        plot.setDomainLabel("Timestamp (s)");
         plot.setRangeLabel(table);
         plot.setDomainStep(XYStepMode.SUBDIVIDE, parsedTimestamps.size());
         //reformat timestamps
@@ -98,7 +98,7 @@ public class PlotActivity extends Activity {
             // create a simple date format that changes the way the date looks
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat(":ss");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("ss");
 
                 // because our timestamps are in seconds and SimpleDateFormat expects milliseconds
                 // we multiply our timestamp by 1000:
@@ -115,7 +115,7 @@ public class PlotActivity extends Activity {
         });
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(1);
-        plot.setTicksPerDomainLabel(2);
+        plot.setTicksPerDomainLabel(10);
 
         //repeat the same to set up the plot
         Log.d(TAG, "Axes end: " + enabledAxes);
