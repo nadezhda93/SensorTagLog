@@ -83,7 +83,7 @@ public class PlotActivity extends Activity {
         }
         Log.d(TAG, "Recording ID: "+ recording.getId());
 
-        //y values - dependent on selection
+        //axis values - dependent on selection
         getData();
         //parse timestamps
         parsedTimestamps = parseTimestamps(timestamps);
