@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-
 import java.util.ArrayList;
 
 /**
@@ -53,6 +52,28 @@ public class ClassifyActivity extends Activity {
 
         //pull required data out of database
         getClassifyData();
+
+
+        //LDA EXAMPLE FROM WEBSITE
+        // You need a double array with the features of the objects
+        // and an int-array with their group membership
+        int[] group = { 1, 1, 1, 1, 2, 2, 2 };
+        double[][] data = { { 2.95, 6.63 }, { 2.53, 7.79 }, { 3.57, 5.65 },
+                { 3.16, 5.47 }, { 2.58, 4.46 }, { 2.16, 6.22 }, { 3.27, 3.52 } };
+
+        //The LDA is "trained"
+        LDA test = new LDA(data, group, true);
+
+        //Now we will try to classify new data
+        double[] testData = { 2.81, 5.46 };
+        Log.d(TAG, "Predicted group: " + test.predict(testData));
+
+        //Let's have a look at the values of the discriminant functions
+        double[] values = test.getDiscriminantFunctionValues(testData);
+        for(int i = 0; i < values.length; i++){
+            Log.d(TAG, "Discriminant function " + (i+1)
+                    + ": " + values[i]);
+       }
 
     }
 
