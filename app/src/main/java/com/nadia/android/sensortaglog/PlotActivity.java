@@ -37,7 +37,7 @@ public class PlotActivity extends Activity {
 
     private final String TAG = "PlotActivity";
 
-    public static final String EXTRAS_REC_ID          = "ExtrasRecId";
+    public static final String EXTRAS_REC_ID  = "ExtrasRecId";
 
     private Intent intent = new Intent();
     private int    mRecId;

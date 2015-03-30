@@ -12,5 +12,10 @@
         android:title="@string/action_plot"
         android:showAsAction="always"/>
 
+    <item
+        android:id="@+id/action_classify"
+        android:title="@string/action_classify"
+        android:showAsAction="always" />
+
 </menu>
 

@@ -135,7 +135,22 @@ public class RecordingsDataActivity extends Activity {
                                         Toast.LENGTH_SHORT).show();
                }
                return true;
-
+            case R.id.action_classify:
+                //classify the data in the recording that is expanded
+                if (selectionAxisMade || selectionSensorMade){
+                    Toast.makeText(RecordingsDataActivity.this, "To classify, only need to expand a recording.",
+                                          Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //start Classify Activity
+                    RecordingsDataModel rec_expanded = mExpRecordingsAdapter.getGroup(lastExpandedPosition);
+                    Log.d(TAG, "Start ClassifyActivity!!");
+                    final Intent intent = new Intent(RecordingsDataActivity.this,
+                            ClassifyActivity.class);
+                    intent.putExtra(ClassifyActivity.EXTRAS_REC_ID, rec_expanded.getId());
+                    startActivity(intent);
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

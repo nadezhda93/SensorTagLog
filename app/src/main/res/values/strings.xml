@@ -19,4 +19,5 @@
     <string name="record_button">Start Recording</string>
     <string name="select_rec_to_plot">Select a recording, one sensor and data to plot:</string>
     <string name="action_plot">Plot</string>
+    <string name="action_classify">Classify</string>
 </resources>
