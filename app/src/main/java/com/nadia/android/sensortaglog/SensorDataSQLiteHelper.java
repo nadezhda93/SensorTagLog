@@ -195,10 +195,10 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
     }
 
     //query x y z values for the required sensor
-    public ArrayList<Float> queryValues(int recId, String table, String value){
+    public ArrayList<Double> queryValues(int recId, String table, String value){
         SQLiteDatabase db_read = this.getReadableDatabase();
         //create an array to store timestamps
-        ArrayList<Float> values = new ArrayList<Float>();
+        ArrayList<Double> values = new ArrayList<Double>();
         //query string
         String sql = "SELECT "+ value + " FROM " + table + " WHERE recID=" + recId;
         Cursor cursor = db_read.rawQuery(sql, null);
@@ -208,8 +208,8 @@ public class SensorDataSQLiteHelper extends SQLiteOpenHelper {
 
         //go through all rows in cursor
         for (int i = 0; i<rows; i++){
-            float x = cursor.getFloat(0);
-            Log.d(TAG, "Value " + value + i + " = " + x);
+            double x = cursor.getDouble(0);
+            //Log.d(TAG, "Value " + value + i + " = " + x);
             values.add(x);
             cursor.moveToNext();
         }

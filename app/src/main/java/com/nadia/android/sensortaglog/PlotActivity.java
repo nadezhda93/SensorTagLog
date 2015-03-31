@@ -49,9 +49,9 @@ public class PlotActivity extends Activity {
 
     private ArrayList<Long> parsedTimestamps = new ArrayList<Long>();
 
-    private ArrayList<Float> xValues = new ArrayList<Float>();
-    private ArrayList<Float> yValues = new ArrayList<Float>();
-    private ArrayList<Float> zValues = new ArrayList<Float>();
+    private ArrayList<Double> xValues = new ArrayList<Double>();
+    private ArrayList<Double> yValues = new ArrayList<Double>();
+    private ArrayList<Double> zValues = new ArrayList<Double>();
 
     private int enabledAxes = 0;
     private ArrayList<XYSeries> xySeries = new ArrayList<XYSeries>();
