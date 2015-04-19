@@ -20,4 +20,10 @@
     <string name="select_rec_to_plot">Select a recording, one sensor and data to plot:</string>
     <string name="action_plot">Plot</string>
     <string name="action_classify">Classify</string>
+    <string name="title_classify">Classification Results</string>
+    <string name="correct_walk">Walking correct: </string>
+    <string name="correct_run">Running correct: </string>
+    <string name="correct_jump">Jumping correct: </string>
+    <string name="overall_accuracy">Overall Accuracy: </string>
+    <string name="sensor_acc">Sensor: accelerometer</string>
 </resources>

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +24,9 @@ public class ClassifyActivity extends Activity {
 
     private Intent intent = new Intent();
     private int    mRecId;
-    private String tableAcc, tableGyro;
+    private String tableAcc;
+
+    private TextView mTrueWalk, mTrueRun, mTrueJump, mTrueOverall;
 
     private SensorDataSQLiteHelper db    = new SensorDataSQLiteHelper(this);
 
@@ -51,12 +55,18 @@ public class ClassifyActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate started");
-        setContentView(R.layout.activity_bluetooth);
+        setContentView(R.layout.activity_classify);
 
         // extract intent information from RecordingsDataActivity
         intent = getIntent();
         mRecId = intent.getIntExtra(EXTRAS_REC_ID, 0);
         Log.d(TAG, "Intent from RecordingActivity: " + mRecId);
+
+        //set TextView widgets
+        mTrueWalk    = (TextView)findViewById(R.id.true_walking);
+        mTrueRun     = (TextView)findViewById(R.id.true_running);
+        mTrueJump    = (TextView)findViewById(R.id.true_jumping);
+        mTrueOverall = (TextView)findViewById(R.id.true_overall);
 
         //pull required data out of database
         getClassifyData();
@@ -122,8 +132,13 @@ public class ClassifyActivity extends Activity {
 //            Log.d(TAG, "index "+ i + " Real: " + labelsClass[i] + " Predic: " + prediction[i]);
 //        }
 
-        float accuracy = getAccuracy(prediction);
-        Log.d(TAG, "Accuracy percentage: " + accuracy*100);
+        float[] accuracy = getAccuracy(prediction);
+        Log.d(TAG, "Accuracy percentage: " + accuracy[3]*100);
+
+        mTrueWalk.setText(String.valueOf((int)accuracy[0]) + "/350");
+        mTrueRun.setText(String.valueOf((int)accuracy[1])+ "/350");
+        mTrueJump.setText(String.valueOf((int)accuracy[2])+ "/350");
+        mTrueOverall.setText(String.valueOf(accuracy[3]*100) + " %");
 
     }
 
@@ -246,7 +261,7 @@ public class ClassifyActivity extends Activity {
         return labels;
     }
 
-    private float getAccuracy(int[] prediction){
+    private float[] getAccuracy(int[] prediction){
         int n = prediction.length;
         Log.d(TAG, "length pred: " + n);
         int n_class = n/3;
@@ -277,11 +292,17 @@ public class ClassifyActivity extends Activity {
                // Log.d(TAG, "trueJump: " + trueJumping);
             }
         }
-
         float truePositives = ((float) trueWalking) + ((float)trueRunning) + ((float)trueJumping);
+
+        float[] accuracy = new float[4];
+        accuracy[0] = (float)trueWalking;
+        accuracy[1] = (float)trueRunning;
+        accuracy[2] = (float)trueJumping;
+        accuracy[3] = truePositives/n;
+
         Log.d(TAG, "TruePos: " + truePositives);
         Log.d(TAG,"OverallAccuracy: " + truePositives/n);
-        return truePositives/n;
+        return accuracy;
 
     }
 }
