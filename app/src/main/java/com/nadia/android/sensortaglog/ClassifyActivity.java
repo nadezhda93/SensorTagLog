@@ -14,6 +14,7 @@ import java.util.List;
  * in the PlotActivity and pull out the data from the database
  * and perform LDA classification using 3/4 as training and
  * 1/4 as classification data and show the results to the user
+ * for accelerometer sensor only
  */
 public class ClassifyActivity extends Activity {
     private final String TAG = "ClassifyActivity";
@@ -21,18 +22,30 @@ public class ClassifyActivity extends Activity {
 
     private Intent intent = new Intent();
     private int    mRecId;
-    private RecordingsDataModel recording;
     private String tableAcc, tableGyro;
 
     private SensorDataSQLiteHelper db    = new SensorDataSQLiteHelper(this);
 
-    private ArrayList<Double> xAcc = new ArrayList<Double>();
-    private ArrayList<Double> yAcc = new ArrayList<Double>();
-    private ArrayList<Double> zAcc = new ArrayList<Double>();
+    private ArrayList<Double> xAccW = new ArrayList<Double>();
+    private ArrayList<Double> xAccR = new ArrayList<Double>();
+    private ArrayList<Double> xAccJ = new ArrayList<Double>();
 
-    private ArrayList<Double> xGyro = new ArrayList<Double>();
-    private ArrayList<Double> yGyro = new ArrayList<Double>();
-    private ArrayList<Double> zGyro = new ArrayList<Double>();
+    private ArrayList<Double> yAccW = new ArrayList<Double>();
+    private ArrayList<Double> yAccR = new ArrayList<Double>();
+    private ArrayList<Double> yAccJ = new ArrayList<Double>();
+
+    private ArrayList<Double> zAccW = new ArrayList<Double>();
+    private ArrayList<Double> zAccR = new ArrayList<Double>();
+    private ArrayList<Double> zAccJ = new ArrayList<Double>();
+
+    private double[] xAccWDouble, xAccRDouble, xAccJDouble;
+    private double[] yAccWDouble, yAccRDouble, yAccJDouble;
+    private double[] zAccWDouble, zAccRDouble, zAccJDouble;
+
+    private int[] labelsTrain;
+    private int[] labelsClass;
+
+    private int[] prediction;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,14 +56,7 @@ public class ClassifyActivity extends Activity {
         // extract intent information from RecordingsDataActivity
         intent = getIntent();
         mRecId = intent.getIntExtra(EXTRAS_REC_ID, 0);
-        Log.d(TAG, "ID selected from RecordingActivity: " + mRecId);
-
-        //get the object that corresponds to mRecId from mRecordings array in RecDataActivity
-        for (int i = 0;i<RecordingsDataActivity.mRecordings.size();i++){
-            if(RecordingsDataActivity.mRecordings.get(i).getId() == mRecId){
-                recording = RecordingsDataActivity.mRecordings.get(i);
-            }
-        }
+        Log.d(TAG, "Intent from RecordingActivity: " + mRecId);
 
         //pull required data out of database
         getClassifyData();
@@ -62,52 +68,62 @@ public class ClassifyActivity extends Activity {
         double[] zAccDouble;
 
 
-        xAccDouble = convertToDoubles(xAcc);
-        yAccDouble = convertToDoubles(yAcc);
-        zAccDouble = convertToDoubles(zAcc);
+        xAccWDouble = convertToDoubles(xAccW);
+        xAccRDouble = convertToDoubles(xAccR);
+        xAccJDouble = convertToDoubles(xAccJ);
 
-        //split up data into training and classification and merge into 2D array
+        yAccWDouble = convertToDoubles(yAccW);
+        yAccRDouble = convertToDoubles(yAccR);
+        yAccJDouble = convertToDoubles(yAccJ);
+
+        zAccWDouble = convertToDoubles(zAccW);
+        zAccRDouble = convertToDoubles(zAccR);
+        zAccJDouble = convertToDoubles(zAccJ);
+
+        //split up data into training and classification for each activity
         Log.d(TAG, "TRAINING");
-        double[][] accTrain = makeTrainClassData("Train", xAccDouble, yAccDouble, zAccDouble);
+        double[][] accWTrain = makeTrainClassData("Train", xAccWDouble, yAccWDouble, zAccWDouble);
+        double[][] accRTrain = makeTrainClassData("Train", xAccRDouble, yAccRDouble, zAccRDouble);
+        double[][] accJTrain = makeTrainClassData("Train", xAccJDouble, yAccJDouble, zAccJDouble);
+
+
         Log.d(TAG, "CLASS");
-        double[][] accClass = makeTrainClassData("Class", xAccDouble, yAccDouble, zAccDouble);
-        double[][] Acc = new double[xAccDouble.length][3];
+        double[][] accWClass = makeTrainClassData("Class", xAccWDouble, yAccWDouble, zAccWDouble);
+        double[][] accRClass = makeTrainClassData("Class", xAccRDouble, yAccRDouble, zAccRDouble);
+        double[][] accJClass = makeTrainClassData("Class", xAccJDouble, yAccJDouble, zAccJDouble);
 
-        int n_accTrain = accTrain.length;
+        //merge training data: walking_train, running_train, jumping_train
+        double allTrain[][] = mergeMatrices(accWTrain,accRTrain,accJTrain);
 
-//        Log.d(TAG,"ALL DATA");
-//        for (int rows = 0;rows < xAccDouble.length;rows++){
-//            Acc[rows][0] = xAccDouble[rows];
-//            Acc[rows][1] = yAccDouble[rows];
-//            Acc[rows][2] = zAccDouble[rows];
-//
-//            Log.d(TAG,"row: " + rows + " : " + Acc[rows][0] + " " + Acc[rows][1] + " " + Acc[rows][2]);
-//        }
+        //make labels for the training data 1/3 walking, 1/3 running, 1/3 jumping
+        labelsTrain = makeLabels(allTrain);
 
-        //for(int j = 0; j<xAccDouble.length; j++) {
-          //  Log.d(TAG, "value orig : " + xAcc.get(j) + " value double " + xAccDouble[j]);
-        //}
+        //merge training data: walking_class, running_class, jumping_class
+        double allClass[][] = mergeMatrices(accWClass,accRClass,accJClass);
 
-        //LDA EXAMPLE FROM WEBSITE
+        //make known labels for comparison
+        labelsClass = makeLabels(allClass);
+
+        prediction = new int[labelsClass.length];
+        //PERFORM LDA
         // You need a double array with the features of the objects
         // and an int-array with their group membership
-//        int[] group = { 1, 1, 1, 1, 2, 2, 2 };
-//        double[][] data = { { 2.95, 6.63 }, { 2.53, 7.79 }, { 3.57, 5.65 },
-//                { 3.16, 5.47 }, { 2.58, 4.46 }, { 2.16, 6.22 }, { 3.27, 3.52 } };
-//
-//        //The LDA is "trained"
-//        LDA test = new LDA(data, group, true);
-//
-//        //Now we will try to classify new data
-//        double[] testData = { 2.81, 5.46 };
-//        Log.d(TAG, "Predicted group: " + test.predict(testData));
-//
-//        //Let's have a look at the values of the discriminant functions
-//        double[] values = test.getDiscriminantFunctionValues(testData);
-//        for(int i = 0; i < values.length; i++){
-//            Log.d(TAG, "Discriminant function " + (i+1)
-//                    + ": " + values[i]);
- //       }
+
+        //The LDA is "trained"
+        LDA classify = new LDA(allTrain, labelsTrain, true);
+
+        //Now we will try to classify new data for every row
+        for (int i=0; i<allClass.length; i++){
+            prediction[i] = classify.predict(allClass[i]);
+        }
+
+        //Check the values of the prediction against known labels
+//        for(int i = 0; i < labelsClass.length; i++){
+//            Log.d(TAG, "index "+ i + " Real: " + labelsClass[i] + " Predic: " + prediction[i]);
+//        }
+
+        float accuracy = getAccuracy(prediction);
+        Log.d(TAG, "Accuracy percentage: " + accuracy*100);
 
     }
 
@@ -120,25 +136,24 @@ public class ClassifyActivity extends Activity {
 
     private void getClassifyData(){
         //Accelerometer - get x y z values
+        //Order: 1. walking 2. jumping 3. running
         tableAcc = "Accelerometer";
-        xAcc = db.queryValues(mRecId, tableAcc, "x");
-        //double[] x_acc = new double[xAcc.size()];
-        //x_acc = (double)xAcc.toArray(x_acc);
 
-        yAcc = db.queryValues(mRecId, tableAcc, "y");
-        zAcc = db.queryValues(mRecId, tableAcc, "z");
+        xAccW = db.queryValues(1, tableAcc, "x");
+        xAccR = db.queryValues(3, tableAcc, "x");
+        xAccJ = db.queryValues(2, tableAcc, "x");
 
+        yAccW = db.queryValues(1, tableAcc, "y");
+        yAccR = db.queryValues(3, tableAcc, "y");
+        yAccJ = db.queryValues(2, tableAcc, "y");
 
-        //Gyroscope - get x y z values
-        tableGyro = "Gyroscope";
-        xGyro = db.queryValues(mRecId, tableGyro, "x");
-        yGyro = db.queryValues(mRecId, tableGyro, "y");
-        zGyro = db.queryValues(mRecId, tableGyro, "z");
+        zAccW = db.queryValues(1, tableAcc, "z");
+        zAccR = db.queryValues(3, tableAcc, "z");
+        zAccJ = db.queryValues(2, tableAcc, "z");
+
     }
 
-
-    private static double[] convertToDoubles(List<Double> Doubles)
-    {
+    private static double[] convertToDoubles(List<Double> Doubles) {
         double[] doubles_primitive = new double[Doubles.size()];
         //Iterator<Float> iterator = doubles.iterator();
 
@@ -148,11 +163,7 @@ public class ClassifyActivity extends Activity {
         return doubles_primitive;
     }
 
-
-
-
-
-    private double[][] makeTrainClassData(String data, double[] x, double[] y, double[] z){
+    private double[][] makeTrainClassData(String data, double[]x, double[]y, double[]z){
         int n = x.length;  //lengths of either training or class data
         double[] cut_x;
         double[] cut_y;
@@ -160,9 +171,9 @@ public class ClassifyActivity extends Activity {
 
         if (data.equals("Class")) {
             //classification data, take last 1/3 of samples
-            n = n / 4 + 1;                   //split up data into 1/4 or 3/4
+            n = 350;                          //split up data into 1/4 or 3/4
             Log.d(TAG, "length 1/4: " + n);
-            int n_start_index = (x.length*3)/4;     //index 3/4 of the way in
+            int n_start_index = 1050;     //index 3/4 of the way in
             cut_x = new double[n];
             cut_y = new double[n];
             cut_z = new double[n];
@@ -177,7 +188,7 @@ public class ClassifyActivity extends Activity {
         }
         else{
             //Training data, take first 3/4 of samples
-            n = (n * 3)/4;
+            n = 1050;
             Log.d(TAG, "length 3/4: " + n);
             cut_x = new double[n];
             cut_y = new double[n];
@@ -201,4 +212,78 @@ public class ClassifyActivity extends Activity {
         }
         return sensorData;
     }
+
+    private double[][] mergeMatrices(double[][]walking, double[][]running, double[][]jumping){
+       //Log.d(TAG, "Walk col: " + String.valueOf(walking[0].length) +"row: "+ walking.length);
+       //Log.d(TAG, "Run col: "  + String.valueOf(running[0].length) +"row: " + running.length);
+       //Log.d(TAG, "Jump col: " + String.valueOf(jumping[0].length) +"row: " + jumping.length);
+
+        double[][] result = new double[walking.length + running.length + jumping.length][3];
+
+        for(int w = 0; w < walking.length; w++)
+            System.arraycopy( walking[w], 0, result[0], 0, walking[w].length);
+
+        for(int r = 0; r < running.length; r++)
+            System.arraycopy( running[r], 0, result[r + walking.length], 0, running[r].length );
+
+        for(int j = 0; j < jumping.length; j++)
+            System.arraycopy(jumping[j], 0, result[j + walking.length + running.length], 0, jumping[j].length);
+
+        //Log.d(TAG, "result col: "+ result[0].length + " row: 3150/1050?? " + result.length);
+        return result;
+    }
+
+    private int[] makeLabels(double[][]trainData){
+        int[] labels = new int[trainData.length];
+        int n = trainData.length/3;
+
+        for(int i = 0; i<n; i++){
+            labels[i]        = 1;  //walking
+            labels[i+n]      = 2;  //running
+            labels[i+2*n]    = 3;  //jumping
+        }
+
+        return labels;
+    }
+
+    private float getAccuracy(int[] prediction){
+        int n = prediction.length;
+        Log.d(TAG, "length pred: " + n);
+        int n_class = n/3;
+
+        int trueWalking = 0;
+        int trueRunning = 0;
+        int trueJumping = 0;
+
+        //get true positives for walking from 0 to 249
+        for(int i = 0; i<n_class; i++){
+            if(prediction[i] == 1){
+                trueWalking = trueWalking + 1;
+               // Log.d(TAG, "trueWalk: " + trueWalking);
+            }
+        }
+        //get true positives for running from 350 to 699
+        for(int i = n_class; i<2*n_class; i++){
+            if(prediction[i] == 2){
+                trueRunning = trueRunning + 1;
+                //Log.d(TAG, "trueRun: " + trueRunning);
+            }
+        }
+
+        //get true positives for jumping from 700 to 1049
+        for(int i = 2*n_class; i<3*n_class; i++){
+            if(prediction[i] == 3){
+                trueJumping = trueJumping + 1;
+               // Log.d(TAG, "trueJump: " + trueJumping);
+            }
+        }
+
+        float truePositives = ((float) trueWalking) + ((float)trueRunning) + ((float)trueJumping);
+        Log.d(TAG, "TruePos: " + truePositives);
+        Log.d(TAG,"OverallAccuracy: " + truePositives/n);
+        return truePositives/n;
+
+    }
 }
+
+

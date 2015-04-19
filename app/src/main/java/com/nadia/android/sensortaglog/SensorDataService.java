@@ -185,30 +185,6 @@ public class SensorDataService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "Write operation successful");
 
-//                //enable notifications for Accelerometer sensor
-//                setNotification(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_SERVICE"),
-//                                (UUID) SensorDataModel.allServices.get("Accelerometer").get("ACCELEROMETER_DATA"), true);
-//                Log.d(TAG, "Acc notifications enabled");
-//
-//                //enable notifications for Gyroscope sensor
-//                enableHandler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
-//                                (UUID)SensorDataModel.allServices.get("Gyroscope").get("GYRO_DATA"), true);
-//                        Log.d(TAG, "Gyro notifications enabled");
-//                    }
-//                }, 1000);
-//
-//                //enable notifications for Magnetometer sensor
-//                enableHandler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        setNotification(sConnectedGatt, (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-//                                (UUID)SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_DATA"), true);
-//                        Log.d(TAG, "Mag notifications enabled");
-//                    }
-//                }, 1000);
             }
             else {
                 Log.d(TAG, "Write operation returned status: " + status);

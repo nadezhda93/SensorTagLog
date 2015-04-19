@@ -7,18 +7,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
-
-import com.androidplot.Plot;
-
-import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by nadia on 09/01/15.
@@ -135,21 +128,15 @@ public class RecordingsDataActivity extends Activity {
                                         Toast.LENGTH_SHORT).show();
                }
                return true;
+
             case R.id.action_classify:
-                //classify the data in the recording that is expanded
-                if (selectionAxisMade || selectionSensorMade){
-                    Toast.makeText(RecordingsDataActivity.this, "To classify, only need to expand a recording.",
-                                          Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    //start Classify Activity
-                    RecordingsDataModel rec_expanded = mExpRecordingsAdapter.getGroup(lastExpandedPosition);
-                    Log.d(TAG, "Start ClassifyActivity!!");
-                    final Intent intent = new Intent(RecordingsDataActivity.this,
-                            ClassifyActivity.class);
-                    intent.putExtra(ClassifyActivity.EXTRAS_REC_ID, rec_expanded.getId());
-                    startActivity(intent);
-                }
+                //classify the data for rec1, 2, 3, volunteer 4
+                //start Classify Activity
+                Log.d(TAG, "Start ClassifyActivity!!");
+                final Intent intent = new Intent(RecordingsDataActivity.this,
+                        ClassifyActivity.class);
+                intent.putExtra(ClassifyActivity.EXTRAS_REC_ID, 1);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
