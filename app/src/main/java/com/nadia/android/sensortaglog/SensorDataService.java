@@ -126,24 +126,24 @@ public class SensorDataService extends Service {
                 }, 1700);
 
                 //enable Gyroscope sensor
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
-                                (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_CONFIG"), true);
+                //enableHandler.postDelayed(new Runnable() {
+                 //   @Override
+                 //   public void run() {
+                 //       enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_SERVICE"),
+                 //               (UUID) SensorDataModel.allServices.get("Gyroscope").get("GYRO_CONFIG"), true);
 
-                    }
-                }, 1900);
+                    //}
+                //}, 1900);
 
                 //enable Magnetometer sensor after 1 sec
-                enableHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
-                                (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
-                        Log.d(TAG, "Magnetometer sensor enabled");
-                    }
-                }, 2100);
+                //enableHandler.postDelayed(new Runnable() {
+                //    @Override
+                //    public void run() {
+                //        enableSensor(sConnectedGatt, (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_SERVICE"),
+                //                (UUID) SensorDataModel.allServices.get("Magnetometer").get("MAGNETOMETER_CONFIG"), true);
+                //        Log.d(TAG, "Magnetometer sensor enabled");
+                //    }
+                //}, 2100);
 
                 //enable notifications for Accelerometer sensor
                 enableHandler.postDelayed(new Runnable(){
@@ -259,11 +259,11 @@ public class SensorDataService extends Service {
         }
         bluetoothGatt.writeCharacteristic(config);  //write to characteristic
     }
-    //Changing period by writing to period UUID of each sensor to 5 Hz
+    //Changing period by writing to period UUID of each sensor to 50 Hz
     private void changePeriod(BluetoothGatt bluetoothGatt, UUID serviceUuid, UUID periodUuid){
         BluetoothGattService sensorService = bluetoothGatt.getService(serviceUuid);
         BluetoothGattCharacteristic sensorPeriod = sensorService.getCharacteristic(periodUuid);
-        sensorPeriod.setValue(new byte[]{20}); //set Period to 20 * 10 ms = 200 ms = 1/5th
+        sensorPeriod.setValue(new byte[]{8}); //set Period to 2 * 10 ms = 20 ms = 1/50th
         bluetoothGatt.writeCharacteristic(sensorPeriod);
         Log.d(TAG, "Period value after write " +
                 sensorPeriod.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8,0));

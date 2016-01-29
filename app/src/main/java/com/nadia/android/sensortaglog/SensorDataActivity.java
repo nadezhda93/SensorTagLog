@@ -149,8 +149,13 @@ public class SensorDataActivity extends Activity {
                     mPlotButton.setEnabled(false);         //disable plot button when recording
                     //check if database exists and set recID accordingly
                     if (db.doesDatabaseExist()) {
-                        //get the last recording number and increment
-                        recID = db.queryDatabase() + 1;
+                        if (!(recID >= 1)) {
+                            recID = 1;
+                        }
+                        else{
+                            //get the last recording number and increment
+                            recID = db.queryDatabase() + 1;
+                        }
                     }
                     else{
                         //database not created so initialise to 1
